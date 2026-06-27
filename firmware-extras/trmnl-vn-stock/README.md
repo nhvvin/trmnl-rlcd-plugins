@@ -166,6 +166,73 @@ Lý do: VN market giao dịch 9:00–11:30 + 13:00–15:00 ICT (Mon–Fri). Refr
 
 ---
 
+---
+
+## 📤 Upload lên Terminus
+
+Terminus (self-hosted BYOS Hanami) hỗ trợ **2 cơ chế import**, khác nhau:
+
+| Cơ chế | Đầu vào | URL endpoint | Use case |
+|---|---|---|---|
+| **Remote** | Plugin ID trên usetrmnl.com | tự fetch `https://usetrmnl.com/api/plugin_settings/{ID}/archive` | Plugin đã publish lên store |
+| **Local** | ZIP file upload | `POST /extensions/import` (multipart) | **Plugin tự build** ← bạn dùng cái này |
+
+ZIP đã build sẵn ở `dist/vn-stock-dashboard.zip`, chứa 2 files:
+
+```
+configuration.yml       ← Terminus native schema (KHÔNG phải settings.yml format TRMNL.com)
+template.html.liquid    ← Liquid template (rename từ full.liquid)
+```
+
+### Way 1 — Web UI (đơn giản nhất)
+
+1. Mở Terminus: `http://45.76.179.84:2300/extensions`
+2. Click **Upload** button (góc phải)
+3. Popover "Extension Import" mở → chọn file `dist/vn-stock-dashboard.zip`
+4. Submit → Terminus tự tạo:
+   - 1 Extension record (`vn_stock_dashboard`)
+   - 1 Exchange record (10 URLs)
+   - Cron job đăng ký vào Sidekiq (`*/30 * * * *`)
+5. Extension xuất hiện trong list → click vào → tab **Models** → chọn `waveshare_esp32_s3_rlcd_4_2`
+6. Playlists → Default → + Item → chọn screen `extension-vn_stock_dashboard` → Save
+7. Wake board
+
+### Way 2 — curl (automate)
+
+```bash
+curl -sS -i \
+  -F extension_attachment=@firmware-extras/trmnl-vn-stock/dist/vn-stock-dashboard.zip \
+  http://45.76.179.84:2300/extensions/import
+```
+
+Response 302 redirect = OK. Sau đó vẫn vào UI để assign Model + Playlist (bước 5-6 ở trên).
+
+### Way 3 — Rebuild ZIP (khi đổi template / ticker / interval)
+
+```bash
+# Cài rubyzip nếu chưa có:
+gem install --user-install rubyzip -v 2.4.1
+
+# Rebuild từ settings.yml + full.liquid:
+ruby -I"$(gem env gemdir)/gems/rubyzip-2.4.1/lib" \
+     firmware-extras/trmnl-vn-stock/build_zip.rb
+
+# Hoặc build + upload trong 1 lệnh:
+ruby -I"..."  firmware-extras/trmnl-vn-stock/build_zip.rb upload 45.76.179.84:2300
+```
+
+---
+
+## 🔄 Cập nhật plugin sau khi upload
+
+Sau import lần đầu, Terminus đã có record trong DB. Nếu sửa template / URL list:
+
+- **Cách lazy**: Vào UI extension → Edit Template + Edit Exchange → Save (không cần re-upload ZIP)
+- **Cách clean**: Xoá extension cũ qua UI → re-upload ZIP mới
+
+Edit qua UI nhanh hơn cho thử nghiệm.
+
+
 ## File layout
 
 ```

@@ -4,12 +4,12 @@
 # Liquid templating. The line-length rule does not apply meaningfully here.
 ---
 strategy: polling
-no_screen_padding: 'no'
-dark_mode: 'no'
-static_data: ''
+no_screen_padding: "no"
+dark_mode: "no"
+static_data: ""
 polling_verb: get
 framework_version: latest
-serverless_language: ''
+serverless_language: ""
 # Block scalar (|) preserves newlines.
 # Terminus URIBuilder splits the rendered output by whitespace -> one Exchange
 # source per URL. source_1=VNINDEX, source_2..source_9=user tickers, source_10=VN30.
@@ -25,8 +25,8 @@ polling_url: |
   https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t7 | default: 'VCB' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
   https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t8 | default: 'MWG' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
   https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VN30&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
-polling_headers: ''
-polling_body: ''
+polling_headers: ""
+polling_body: ""
 custom_fields:
   - keyname: t1
     field_type: string
@@ -76,6 +76,6 @@ custom_fields:
       Theo doi 8 co phieu VN + VN-Index + VN30, refresh 30 phut.
       Data tu SSI iBoard (free, khong can API key).
       Toi uu cho 400x300 mono e-ink.
-    email_address: ''
+    email_address: ""
 name: VN Stock Dashboard
 refresh_interval: 30
