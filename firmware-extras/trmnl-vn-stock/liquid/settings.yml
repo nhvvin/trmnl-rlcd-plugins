@@ -1,0 +1,81 @@
+# yamllint disable rule:line-length
+# TRMNL plugin format requires polling_url as a single YAML string with
+# URLs separated by newlines; each URL is intrinsically ~222 chars due to
+# Liquid templating. The line-length rule does not apply meaningfully here.
+---
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: latest
+serverless_language: ''
+# Block scalar (|) preserves newlines.
+# Terminus URIBuilder splits the rendered output by whitespace -> one Exchange
+# source per URL. source_1=VNINDEX, source_2..source_9=user tickers, source_10=VN30.
+# 30-day window: 'now' - 2592000s.
+polling_url: |
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t1 | default: 'VNM' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t2 | default: 'FPT' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t3 | default: 'MSN' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t4 | default: 'VIC' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t5 | default: 'VHM' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t6 | default: 'HPG' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t7 | default: 'VCB' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol={{ trmnl.plugin_settings.custom_fields_values.t8 | default: 'MWG' }}&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+  https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VN30&from={{ 'now' | date: '%s' | minus: 2592000 }}&to={{ 'now' | date: '%s' }}
+polling_headers: ''
+polling_body: ''
+custom_fields:
+  - keyname: t1
+    field_type: string
+    name: Ticker 1
+    description: VN ticker (HoSE/HNX). Default VNM
+    placeholder: VNM
+  - keyname: t2
+    field_type: string
+    name: Ticker 2
+    description: Default FPT
+    placeholder: FPT
+  - keyname: t3
+    field_type: string
+    name: Ticker 3
+    description: Default MSN
+    placeholder: MSN
+  - keyname: t4
+    field_type: string
+    name: Ticker 4
+    description: Default VIC
+    placeholder: VIC
+  - keyname: t5
+    field_type: string
+    name: Ticker 5
+    description: Default VHM
+    placeholder: VHM
+  - keyname: t6
+    field_type: string
+    name: Ticker 6
+    description: Default HPG
+    placeholder: HPG
+  - keyname: t7
+    field_type: string
+    name: Ticker 7
+    description: Default VCB
+    placeholder: VCB
+  - keyname: t8
+    field_type: string
+    name: Ticker 8
+    description: Default MWG
+    placeholder: MWG
+  - keyname: about
+    name: About This Plugin
+    category: finance
+    field_type: author_bio
+    description: >-
+      Theo doi 8 co phieu VN + VN-Index + VN30, refresh 30 phut.
+      Data tu SSI iBoard (free, khong can API key).
+      Toi uu cho 400x300 mono e-ink.
+    email_address: ''
+name: VN Stock Dashboard
+refresh_interval: 30
