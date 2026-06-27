@@ -53,8 +53,11 @@ headers     = headers_str.empty? ? {} : YAML.safe_load(headers_str)
 body_str    = trmnl["polling_body"].to_s.strip
 body        = body_str.empty? ? {} : YAML.safe_load(body_str)
 
+# Terminus Types::Version regex: /\A\d+\.\d+\.\d+\Z/  → must be strict semver (e.g. 1.0.0).
+PLUGIN_VERSION = "1.0.0"
+
 config = {
-  "version"           => "latest",
+  "version"           => PLUGIN_VERSION,
   "name"              => name,
   "label"             => label,
   "description"       => "VN stocks dashboard: VN-Index + 8 blue chips + VN30. Data: SSI iBoard (free, no API key).",
