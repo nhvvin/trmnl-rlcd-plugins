@@ -232,7 +232,6 @@ Sau import lần đầu, Terminus đã có record trong DB. Nếu sửa template
 
 Edit qua UI nhanh hơn cho thử nghiệm.
 
-
 ---
 
 ## ⚠️ Gotchas khi import vào Terminus (đã verify với Terminus 0.63)
@@ -240,14 +239,19 @@ Edit qua UI nhanh hơn cho thử nghiệm.
 Đây là các bug khám phá ra qua thực tế live debugging trên VPS:
 
 ### 1. `version` PHẢI là strict semver
+
 Terminus `lib/terminus/types.rb` quy định:
+
 ```ruby
 Version = String.constrained(format: /\A\d+\.\d+\.\d+\Z/)
 ```
+
 → Chỉ chấp nhận `1.0.0`, `0.63.0`. KHÔNG chấp nhận `latest`, `v1.0.0`, `1.0`. `build_zip.rb` mặc định `1.0.0`.
 
 ### 2. `mode` chỉ có 2 giá trị hợp lệ: `text` hoặc `dither`
+
 **KHÔNG có `html`**. Ý nghĩa thực tế:
+
 - `text` → **1-bit BMP** (cho monochrome e-ink)
 - `dither` → **24-bit BMP với dithering** (cho color displays)
 
@@ -255,10 +259,13 @@ Waveshare ESP32-S3-RLCD-4.2 (ST7305) là **monochrome 1-bit** → **PHẢI dùng
 Dùng `dither` → BMP 24-bit (~360KB) → firmware reject.
 
 ### 3. KHÔNG assign device trực tiếp vào Extension
+
 Logic `Jobs::Batches::Extension`:
+
 ```ruby
 extension.devices.any? ? enqueue_devices(extension) : enqueue_models(extension)
 ```
+
 - Có device → tạo Screen với `device_id=X`
 - Chỉ model → tạo Screen với `device_id=NULL`
 
@@ -267,7 +274,9 @@ Constraint DB: `UNIQUE (device_id, kind) WHERE device_id IS NOT NULL`. Mỗi dev
 **Đúng pattern**: chỉ check **model** ở extension, dùng **Playlist** để bind screen→device. Multi extension/device.
 
 ### 4. CSRF token phải gửi qua header `X-Csrf-Token` cho mutation requests
+
 Khi PUT/DELETE qua curl/script, gửi body `_csrf_token` KHÔNG đủ — Terminus reject với 500. Phải kèm:
+
 ```
 -H "X-Csrf-Token: <token>"
 ```
@@ -276,12 +285,38 @@ Khi PUT/DELETE qua curl/script, gửi body `_csrf_token` KHÔNG đủ — Termin
 
 1. Import ZIP qua UI `/extensions` → Upload button (hoặc curl `POST /extensions/import`)
 2. Vào extension `vn_stock_dashboard` → tab **Models**: check **Waveshare ESP32-S3-RLCD-4.2** (id=47), bỏ default `og_plus`
-3. **Devices**: để TRỐNG (không check device nào)
+3. **Devices**: để TRỐNG (không check device nào) **NGAY LẦN ĐẦU** — xem gotcha 6
 4. Save
 5. Click button **Build** → trigger render → Screen sẽ tạo (verify ở `/screens`)
 6. Vào **Playlists** → playlist của device (vd `Device 1`) → **Items** → **+ New** → chọn screen `Extension VN Stock Dashboard` → Save
 7. Wake board → fetch playlist → cycle qua VN Stock screen
 
+### 6. ⚠️ NGUY HIỂM: Đã từng tick device → có stuck Sidekiq retries → file BMP bị xoá định kỳ
+
+Khi extension đã từng tick `device_ids=[1]` rồi gỡ ra:
+
+- Mỗi 30 min (interval), cron `Batches::Extension(8)` enqueue `Jobs::Extensions::Screen(8, nil, 1)` (vì lúc đó device 1 còn được attach)
+- Job đó tries to UPDATE screen, set `device_id=1, kind='general'` → conflict với Weather screen 7 (đã chiếm slot)
+- Job throw `UniqueConstraintError` → Sidekiq retry 25 lần (~21 ngày)
+- **Critical**: Trước khi UPDATE fail, code đã chạy `record.replace(io)` → **vật lý xoá file BMP cũ trên disk**, upload file mới. Khi UPDATE fail và rollback DB, image_data trong DB unchanged (vẫn trỏ file cũ) NHƯNG file cũ đã bị xoá → device fetch 404 → `ESP_FAIL`.
+
+**Triệu chứng**: VN Stock screen chốc OK chốc 404, device báo `No image: ESP_FAIL` xen kẽ với màn hình bình thường.
+
+**Fix**:
+
+- **Option A (browser)**: Đăng nhập <http://VPS:2300>, mở `/sidekiq/retries`, click button **"Delete All"** (button đỏ ở dưới). Sidekiq Web có CSRF, browser chạy được, curl không.
+- **Option B (SSH)**: SSH vào VPS, find container Sidekiq, chạy 1 dòng:
+
+  ```bash
+  # Nếu Terminus deploy bằng Docker Compose:
+  docker exec -i $(docker ps -qf name=redis) redis-cli DEL terminus:retry
+  # Hoặc nuke toàn bộ retry queue của Sidekiq:
+  docker exec -i $(docker ps -qf name=redis) redis-cli --no-raw EVAL "local k=redis.call('KEYS','*retry*'); for _,v in ipairs(k) do redis.call('DEL',v) end; return #k" 0
+  ```
+
+- **Option C (chờ)**: Không làm gì, sau ~21 ngày Sidekiq tự đẩy retry vào Dead set, không còn fire nữa. Trong lúc đó accept intermittent failure.
+
+**Phòng tránh**: Khi import lại extension, KHÔNG BAO GIỜ tick device 1 trên Extension page. Chỉ dùng Playlist để bind.
 
 ## File layout
 
