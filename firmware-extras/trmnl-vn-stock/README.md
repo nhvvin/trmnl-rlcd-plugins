@@ -291,32 +291,89 @@ Khi PUT/DELETE qua curl/script, gửi body `_csrf_token` KHÔNG đủ — Termin
 6. Vào **Playlists** → playlist của device (vd `Device 1`) → **Items** → **+ New** → chọn screen `Extension VN Stock Dashboard` → Save
 7. Wake board → fetch playlist → cycle qua VN Stock screen
 
-### 6. ⚠️ NGUY HIỂM: Đã từng tick device → có stuck Sidekiq retries → file BMP bị xoá định kỳ
+### 6. ⚠️ NGUY HIỂM: Đã từng tick device → stuck Sidekiq retries → file BMP biến mất khỏi disk (verified & fixed 2026-06-28)
 
-Khi extension đã từng tick `device_ids=[1]` rồi gỡ ra:
+**Nguồn gốc**: Khi import extension từng tick `device_ids=[1]` rồi gỡ ra, các job đã enqueue trước đó với args `(extension_id, nil, device_id=1)` vẫn nằm trong Sidekiq `retry` sorted set. Mỗi lần retry fire (Sidekiq retry policy 25 lần ≈ 21 ngày exponential backoff), chúng tự reproduce bug.
 
-- Mỗi 30 min (interval), cron `Batches::Extension(8)` enqueue `Jobs::Extensions::Screen(8, nil, 1)` (vì lúc đó device 1 còn được attach)
-- Job đó tries to UPDATE screen, set `device_id=1, kind='general'` → conflict với Weather screen 7 (đã chiếm slot)
-- Job throw `UniqueConstraintError` → Sidekiq retry 25 lần (~21 ngày)
-- **Critical**: Trước khi UPDATE fail, code đã chạy `record.replace(io)` → **vật lý xoá file BMP cũ trên disk**, upload file mới. Khi UPDATE fail và rollback DB, image_data trong DB unchanged (vẫn trỏ file cũ) NHƯNG file cũ đã bị xoá → device fetch 404 → `ESP_FAIL`.
+**Cơ chế chi tiết** (đã trace source code `app/aspects/screens/mold_builder.rb` + `app/repositories/screen.rb` + `app/structs/screen.rb`):
 
-**Triệu chứng**: VN Stock screen chốc OK chốc 404, device báo `No image: ESP_FAIL` xen kẽ với màn hình bình thường.
+1. Retry runs `Jobs::Extensions::Screen.perform(8, nil, 1)` — model_id=nil, device_id=1.
+2. `MoldBuilder` gọi `finder.call(model_id: nil, device_id: 1)` → fallback **device 1 → model 47** → mold có `model_id=47, device_id=1`.
+3. `Repository#upsert_with_image` find Screen 278 (name=`extension-vn_stock_dashboard`, model_id=47).
+4. Gọi `record.replace(io)` — implementation trong `Terminus::Structs::Screen`:
 
-**Fix**:
+   ```ruby
+   def replace(io, **)
+     image_destroy  # ← physical delete of old file on disk
+     upload(io, **) # ← physical write of new file on disk
+     self
+   end
+   ```
 
-- **Option A (browser)**: Đăng nhập <http://VPS:2300>, mở `/sidekiq/retries`, click button **"Delete All"** (button đỏ ở dưới). Sidekiq Web có CSRF, browser chạy được, curl không.
-- **Option B (SSH)**: SSH vào VPS, find container Sidekiq, chạy 1 dòng:
+5. Sau replace: file mới đã ở disk, file cũ đã bị xóa.
+6. Gọi `update record.id, image_data: ..., device_id: 1, kind: 'general'` → UPDATE Screen 278 SET device_id=1.
+7. **Constraint violation**: Partial unique index `UNIQUE (device_id, kind) WHERE device_id IS NOT NULL` đã có row (Screen 7, device_id=1, kind='general' — Weather). UPDATE raise.
+8. DB rollback → Screen 278.image_data **không đổi** (vẫn trỏ hash cũ).
+9. NHƯNG file cũ đã bị `image_destroy` xóa ở step 4 → DB references file đã gone → **404**.
+10. Sidekiq tăng retry counter → job sẽ chạy lại sau (1m, 4m, 16m, ... lên tới ngày 21).
 
-  ```bash
-  # Nếu Terminus deploy bằng Docker Compose:
-  docker exec -i $(docker ps -qf name=redis) redis-cli DEL terminus:retry
-  # Hoặc nuke toàn bộ retry queue của Sidekiq:
-  docker exec -i $(docker ps -qf name=redis) redis-cli --no-raw EVAL "local k=redis.call('KEYS','*retry*'); for _,v in ipairs(k) do redis.call('DEL',v) end; return #k" 0
-  ```
+**Triệu chứng device**: VN Stock screen chốc 200 chốc 404. Firmware báo `No image: ESP_FAIL` xen kẽ với màn hình bình thường. Pattern: mới Build xong → OK vài phút → retry fire → 404 → next cron fire → OK lại → repeat.
 
-- **Option C (chờ)**: Không làm gì, sau ~21 ngày Sidekiq tự đẩy retry vào Dead set, không còn fire nữa. Trong lúc đó accept intermittent failure.
+**Diagnostic procedure** (đã verify hoạt động trên `terminus-keyvalue-1` Valkey 9 + `terminus-worker-1`):
 
-**Phòng tránh**: Khi import lại extension, KHÔNG BAO GIỜ tick device 1 trên Extension page. Chỉ dùng Playlist để bind.
+```bash
+# 0. Lấy Valkey password từ env của terminus-web-1
+PASS=$(docker exec terminus-web-1 sh -c 'echo $KEYVALUE_URL' | sed -E 's|.*://[^:]*:([^@]+)@.*|\1|')
+
+# 1. Đo retry queue size
+docker exec terminus-keyvalue-1 valkey-cli -a "$PASS" ZCARD retry
+#  → bao nhiêu retry stuck (ví dụ 23)
+
+# 2. Inspect 1 retry job để confirm args
+docker exec terminus-keyvalue-1 valkey-cli -a "$PASS" ZRANGE retry 0 0
+#  → JSON, look for "class":"Terminus::Jobs::Extensions::Screen","args":[8,null,1]
+
+# 3. (CHỈ chạy khi confirm bug) Xóa toàn bộ retry set
+docker exec terminus-keyvalue-1 valkey-cli -a "$PASS" DEL retry
+
+# 4. Verify clear xong
+docker exec terminus-keyvalue-1 valkey-cli -a "$PASS" ZCARD retry  # → 0
+```
+
+**Verify fix** bằng cách enqueue manual job với args đúng:
+
+```bash
+NOW=$(date +%s)
+JID=$(date +%s%N | sha256sum | head -c 24)
+PAYLOAD="{\"retry\":false,\"queue\":\"within_1_minute\",\"class\":\"Terminus::Jobs::Extensions::Screen\",\"args\":[8,47,null],\"jid\":\"$JID\",\"created_at\":$NOW.0,\"enqueued_at\":$NOW.0}"
+docker exec terminus-keyvalue-1 valkey-cli -a "$PASS" LPUSH 'queue:within_1_minute' "$PAYLOAD"
+
+sleep 15
+# Check file ra disk
+docker exec terminus-web-1 ls -lat public/uploads/ | head -3
+# Check serve
+curl -sS -o /dev/null -w "%{http_code} %{size_download}\n" "http://VPS:2300/uploads/<NEW_HASH>.bmp"
+```
+
+**Phòng tránh**:
+
+- KHÔNG BAO GIỜ tick `device_ids=[1]` trên Extension page.
+- Chỉ tick `model_ids=[47]` trong Extension.
+- Dùng **Playlist** để bind screen → device (Playlist 2 → Screen 7 + Screen 278).
+- Sau khi cron `Batches::Extension(N)` chạy: extension không có devices → fan-out đi đường `enqueue_models` → `Screen.perform_async(N, model_id, nil)` → mold có `device_id=NULL` → UPDATE Screen SET device_id=NULL → KHÔNG conflict với Screen 7. An toàn vĩnh viễn.
+
+**Long-term upstream fix** (đề xuất gửi PR Terminus): swap thứ tự trong `Screen#replace` — upload trước, image_destroy sau khi DB commit:
+
+```ruby
+def replace(io, **)
+  old_id = image_id
+  upload(io, **)              # write new first
+  yield if block_given?       # caller commits DB here
+  store.delete old_id if old_id && old_id != image_id
+end
+```
+
+Và/hoặc bọc `update_with_image` trong DB transaction với on-rollback hook xóa file mới.
 
 ## File layout
 
