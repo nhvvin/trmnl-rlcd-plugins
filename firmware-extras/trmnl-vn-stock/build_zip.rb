@@ -56,12 +56,17 @@ body        = body_str.empty? ? {} : YAML.safe_load(body_str)
 # Terminus Types::Version regex: /\A\d+\.\d+\.\d+\Z/  → must be strict semver (e.g. 1.0.0).
 PLUGIN_VERSION = "1.0.0"
 
+# Terminus mode enum: "text" (1-bit BMP) | "dither" (24-bit BMP).
+# Waveshare ESP32-S3-RLCD-4.2 (ST7305) is monochrome → must be "text".
+# Using "dither" produces a 24-bit BMP that the firmware rejects.
+PLUGIN_MODE = "text"
+
 config = {
   "version"           => PLUGIN_VERSION,
   "name"              => name,
   "label"             => label,
   "description"       => "VN stocks dashboard: VN-Index + 8 blue chips + VN30. Data: SSI iBoard (free, no API key).",
-  "mode"              => "html",
+  "mode"              => PLUGIN_MODE,
   "kind"              => "poll",
   "tags"              => ["finance", "vietnam"],
   "static_body"       => {},

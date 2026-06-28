@@ -233,6 +233,56 @@ Sau import lần đầu, Terminus đã có record trong DB. Nếu sửa template
 Edit qua UI nhanh hơn cho thử nghiệm.
 
 
+---
+
+## ⚠️ Gotchas khi import vào Terminus (đã verify với Terminus 0.63)
+
+Đây là các bug khám phá ra qua thực tế live debugging trên VPS:
+
+### 1. `version` PHẢI là strict semver
+Terminus `lib/terminus/types.rb` quy định:
+```ruby
+Version = String.constrained(format: /\A\d+\.\d+\.\d+\Z/)
+```
+→ Chỉ chấp nhận `1.0.0`, `0.63.0`. KHÔNG chấp nhận `latest`, `v1.0.0`, `1.0`. `build_zip.rb` mặc định `1.0.0`.
+
+### 2. `mode` chỉ có 2 giá trị hợp lệ: `text` hoặc `dither`
+**KHÔNG có `html`**. Ý nghĩa thực tế:
+- `text` → **1-bit BMP** (cho monochrome e-ink)
+- `dither` → **24-bit BMP với dithering** (cho color displays)
+
+Waveshare ESP32-S3-RLCD-4.2 (ST7305) là **monochrome 1-bit** → **PHẢI dùng `mode: text`**.
+Dùng `dither` → BMP 24-bit (~360KB) → firmware reject.
+
+### 3. KHÔNG assign device trực tiếp vào Extension
+Logic `Jobs::Batches::Extension`:
+```ruby
+extension.devices.any? ? enqueue_devices(extension) : enqueue_models(extension)
+```
+- Có device → tạo Screen với `device_id=X`
+- Chỉ model → tạo Screen với `device_id=NULL`
+
+Constraint DB: `UNIQUE (device_id, kind) WHERE device_id IS NOT NULL`. Mỗi device chỉ 1 screen với `kind='general'` (mặc định). Nếu 2 extension cùng assign device 1 → unique violation, retry forever.
+
+**Đúng pattern**: chỉ check **model** ở extension, dùng **Playlist** để bind screen→device. Multi extension/device.
+
+### 4. CSRF token phải gửi qua header `X-Csrf-Token` cho mutation requests
+Khi PUT/DELETE qua curl/script, gửi body `_csrf_token` KHÔNG đủ — Terminus reject với 500. Phải kèm:
+```
+-H "X-Csrf-Token: <token>"
+```
+
+### 5. Workflow đúng sau import
+
+1. Import ZIP qua UI `/extensions` → Upload button (hoặc curl `POST /extensions/import`)
+2. Vào extension `vn_stock_dashboard` → tab **Models**: check **Waveshare ESP32-S3-RLCD-4.2** (id=47), bỏ default `og_plus`
+3. **Devices**: để TRỐNG (không check device nào)
+4. Save
+5. Click button **Build** → trigger render → Screen sẽ tạo (verify ở `/screens`)
+6. Vào **Playlists** → playlist của device (vd `Device 1`) → **Items** → **+ New** → chọn screen `Extension VN Stock Dashboard` → Save
+7. Wake board → fetch playlist → cycle qua VN Stock screen
+
+
 ## File layout
 
 ```
