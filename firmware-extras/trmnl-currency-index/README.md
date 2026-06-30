@@ -83,6 +83,36 @@ These bit us hard while bringing the plugin up. All fixes are baked into the fil
    `bit_depth=1`, `width=400`, `height=300`. The exporter pipeline produces the
    1-bit BMP from the rendered PNG via the model's `bit_depth`.
 
+6. **`screen.kind` is a Postgres ENUM, not text.**
+   Any `WHERE kind LIKE '%foo%'` SQL crashes with:
+
+   ```
+   ERROR:  operator does not exist: screen_kind_enum ~~ unknown
+   ```
+
+   **Fix:** cast to text with `kind::text`:
+
+   ```sql
+   SELECT id, kind::text, model_id, device_id, updated_at
+   FROM screen
+   WHERE kind::text LIKE 'extension-%'
+   ORDER BY updated_at DESC LIMIT 5;
+   ```
+
+   Or use exact `IN` (no cast needed because Postgres compares enum-to-string-literal
+   when both sides are enum-castable):
+
+   ```sql
+   WHERE kind IN ('extension-currency_index', 'extension-vnd_rates')
+   ```
+
+7. **Liquid numeric comparison on Strings.** See `trmnl-vnd-rates/README.md` gotcha #7.
+   Terminus source-data loader sometimes keeps JSON numbers as Strings. `{% if x > 0 %}`
+   crashes with `Liquid error: comparison of String with 0 failed`. Coerce explicit with
+   `| plus: 0.0` before comparing or using `round` directly. Filter math (`minus`/`times`/
+   `divided_by`) auto-coerces, so Currency Index escapes this trap because every value
+   passes through `| times: 100.0 | divided_by: fv | round: 2` first.
+
 ## Files
 
 ```

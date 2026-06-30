@@ -85,10 +85,31 @@ Same 4 gotchas as Currency Index (xem `trmnl-currency-index/README.md`):
 3. Strict semver `1.0.0`
 4. NO `extension_device` row → bind via `extension_model` only
 
-Plus VCB-specific:
+Plus VCB-specific (5–7):
 
 1. **Weekend = stale data.** VCB không update rate cuối tuần. Cron 30 phút vẫn poll nhưng kết quả không đổi. OK chấp nhận được.
+
 2. **`Date` field là ISO string** (`"2026-06-30T00:00:00"`) — template dùng `| date: "%d/%m/%Y"` chuyển sang format VN.
+
+3. **Liquid numeric fields đến dưới dạng String → phải coerce explicit.**
+   Terminus source-data loader giữ JSON numbers của VCB (`cash`, `transfer`, `sell`) là **String**.
+   Direct comparison `{% if row.cash > 0 %}` crash với:
+
+   ```
+   Liquid error: comparison of String with 0 failed
+   ```
+
+   Đây là lỗi Ruby-level (`<=>` operator từ chối so sánh String vs Integer).
+   **Fix:** coerce bằng `| plus: 0.0` trước khi so sánh hoặc `round`:
+
+   ```liquid
+   {%- assign cash_n = row.cash | plus: 0.0 -%}
+   {% if cash_n > 0 %}{{ cash_n | round: 0 }}{% endif %}
+   ```
+
+   Lưu ý: filter math (`minus`, `times`, `divided_by`) tự coerce nên Currency Index không gặp
+   (mọi numeric đều đi qua chain `| times: 100.0 | divided_by: ...`). Chỉ comparison operators
+   và `round` direct mới cần coerce thủ công.
 
 ## Files
 
