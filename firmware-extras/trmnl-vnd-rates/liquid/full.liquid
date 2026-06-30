@@ -21,11 +21,14 @@
       {%- assign s = sym | strip | upcase -%}
       {%- assign row = source_1.Data | where: "currencyCode", s | first -%}
       {%- if row -%}
+      {%- assign cash_n     = row.cash     | plus: 0.0 -%}
+      {%- assign transfer_n = row.transfer | plus: 0.0 -%}
+      {%- assign sell_n     = row.sell     | plus: 0.0 -%}
       <tr style="border-bottom:1px dotted #999;">
         <td style="padding:2px 3px;font-weight:700;">{{ s }}</td>
-        <td style="text-align:right;padding:2px 3px;">{% if row.cash > 0 %}{{ row.cash | round: 0 }}{% else %}—{% endif %}</td>
-        <td style="text-align:right;padding:2px 3px;">{{ row.transfer | round: 0 }}</td>
-        <td style="text-align:right;padding:2px 3px;font-weight:700;">{{ row.sell | round: 0 }}</td>
+        <td style="text-align:right;padding:2px 3px;">{% if cash_n > 0 %}{{ cash_n | round: 0 }}{% else %}—{% endif %}</td>
+        <td style="text-align:right;padding:2px 3px;">{{ transfer_n | round: 0 }}</td>
+        <td style="text-align:right;padding:2px 3px;font-weight:700;">{{ sell_n | round: 0 }}</td>
       </tr>
       {%- endif -%}
       {%- endfor -%}
