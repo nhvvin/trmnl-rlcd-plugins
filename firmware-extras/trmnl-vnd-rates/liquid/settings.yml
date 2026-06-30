@@ -1,0 +1,33 @@
+# yamllint disable rule:line-length
+# Vietcombank (VCB) FX endpoint — official daily VN bank rates.
+# JSON, no auth, no key, no rate limits observed.
+# Returns 20 currencies with 3 columns: cash buy / transfer buy / sell.
+---
+strategy: polling
+no_screen_padding: "no"
+dark_mode: "no"
+static_data: ""
+polling_verb: get
+framework_version: latest
+serverless_language: ""
+polling_url: |
+  https://www.vietcombank.com.vn/api/exchangerates?date={{ 'now' | date: '%Y-%m-%d' }}
+polling_headers: ""
+polling_body: ""
+custom_fields:
+  - keyname: symbols
+    field_type: string
+    name: Symbols (comma separated)
+    description: Currencies to display. Max 8 fit the layout. Default USD,EUR,GBP,JPY,CNY,KRW,SGD,THB.
+    placeholder: USD,EUR,GBP,JPY,CNY,KRW,SGD,THB
+  - keyname: about
+    name: About This Plugin
+    category: finance
+    field_type: author_bio
+    description: >-
+      Tỷ giá ngoại tệ Vietcombank cập nhật hàng ngày. Buy cash / buy transfer / sell — chuẩn ngân hàng VN.
+      Pure HTML/CSS — no JavaScript, no external CDN.
+      Tối ưu cho 400x300 mono e-ink (Waveshare ESP32-S3-RLCD-4.2).
+    email_address: ""
+name: VND Rates
+refresh_interval: 30
