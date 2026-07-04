@@ -16,10 +16,23 @@ firmware-extras/        # Waveshare RLCD 4.2 — TRMNL Liquid plugins
     └── build_zip.rb    # Local build script (Terminus-compatible bundle)
 
 e1002-extras/           # reTerminal E1002 — SenseCraft HMI Web Content pages
-└── lunar-calendar-vn/  # Vietnamese lunar calendar (dương/âm/Can Chi/lễ/tiết khí)
-    ├── index.html      # single page deployed via SenseCraft HMI Web Content
-    ├── preview.html    # desktop grid preview with 6 test dates
-    └── assets/         # style.css, lunar.js (Hồ Ngọc Đức), render.js
+├── lunar-calendar-vn/  # Vietnamese lunar calendar (dương/âm/Can Chi/lễ/tiết khí)
+│   ├── index.html      # single-day view
+│   ├── month.html      # month grid (6×7) view
+│   ├── preview.html    # desktop grid preview
+│   └── assets/         # style.css, month.css, lunar.js (Hồ Ngọc Đức), render.js, month-render.js
+└── gold-price-vn/      # Vietnamese gold price (SJC / Nữ Trang / Nhẫn 9999)
+    ├── index.html      # 800×480 giaVang page
+    ├── preview.html    # 4-scenario preview
+    ├── assets/         # style.css, render.js
+    └── data/           # gold.json (updated by GitHub Actions cron 2×/day)
+```
+
+The gold-price widget also drives a scheduled GitHub Actions workflow:
+
+```
+scripts/fetch-gold-price.mjs          # Node 20, no npm deps
+.github/workflows/update-gold-price.yml  # cron 09:00 & 15:00 VN time
 ```
 
 ## Companion server

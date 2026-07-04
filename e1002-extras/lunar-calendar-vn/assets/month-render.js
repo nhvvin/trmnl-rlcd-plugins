@@ -151,9 +151,20 @@
 			var cellEvents = [];
 			var topEvent = null;
 			if (!isOther) {
-				cellEvents = L.festival(cellD, cellM, cellY, lunar.day, lunar.month, lunar.leap);
+				cellEvents = L.festival(
+					cellD,
+					cellM,
+					cellY,
+					lunar.day,
+					lunar.month,
+					lunar.leap,
+				);
 				if (cellEvents.length > 0) {
-					topEvent = cellEvents.reduce((best, e) => KIND_PRIORITY[e.kind] > KIND_PRIORITY[best.kind] ? e : best, cellEvents[0]);
+					topEvent = cellEvents.reduce(
+						(best, e) =>
+							KIND_PRIORITY[e.kind] > KIND_PRIORITY[best.kind] ? e : best,
+						cellEvents[0],
+					);
 					cellEvents.forEach((e) => {
 						legendItems.push({ day: cellD, event: e });
 					});

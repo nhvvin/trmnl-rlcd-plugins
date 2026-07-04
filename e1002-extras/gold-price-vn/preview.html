@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="utf-8" />
+        <title>Giá vàng — Preview 4 kịch bản</title>
+        <style>
+            :root {
+                color-scheme: light;
+            }
+            body {
+                margin: 0;
+                background: #f0f0f0;
+                font-family: system-ui, sans-serif;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 20px;
+                margin: 0 0 12px;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(2, 800px);
+                gap: 24px;
+                justify-content: center;
+            }
+            .frame-wrap {
+                background: #ffffff;
+                border: 2px solid #000000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            .caption {
+                font-size: 12px;
+                padding: 8px 12px;
+                background: #003399;
+                color: #ffffff;
+                font-weight: 700;
+            }
+            iframe {
+                display: block;
+                width: 800px;
+                height: 480px;
+                border: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Giá vàng — Preview 4 kịch bản</h1>
+        <div class="grid">
+            <div class="frame-wrap">
+                <div class="caption">
+                    Mặc định: today vs yesterday (delta ~0.3–1.2%)
+                </div>
+                <iframe src="index.html" title="default"></iframe>
+            </div>
+            <div class="frame-wrap">
+                <div class="caption">
+                    First run: chưa có yesterday → delta "—"
+                </div>
+                <iframe
+                    src="index.html?data=data/gold-first-run.json"
+                    title="first-run"
+                ></iframe>
+            </div>
+            <div class="frame-wrap">
+                <div class="caption">
+                    Biến động lớn: SJC +14%, Nữ Trang −12%, Nhẫn phẳng
+                </div>
+                <iframe
+                    src="index.html?data=data/gold-big-moves.json"
+                    title="big-moves"
+                ></iframe>
+            </div>
+            <div class="frame-wrap">
+                <div class="caption">
+                    Live DOJI feed (dữ liệu thật gần nhất)
+                </div>
+                <iframe src="index.html?data=data/gold.json" title="live"></iframe>
+            </div>
+        </div>
+    </body>
+</html>

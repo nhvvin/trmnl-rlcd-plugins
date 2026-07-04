@@ -1,0 +1,37 @@
+{
+  "today": {
+    "date": "2026-07-04",
+    "time": "08:47",
+    "iso": "2026-07-04T08:47:00+07:00",
+    "source": {
+      "name": "DOJI",
+      "area": "Miền Trung",
+      "url": "https://update.giavang.doji.vn/banggia/doji_92411/92411",
+      "raw": "08:47 04-07-2026"
+    },
+    "items": [
+      {
+        "key": "sjc_1l",
+        "label": "SJC 1L",
+        "raw": "Miếng SJC (Loại 1L) - Bán Lẻ",
+        "buy": 14840000,
+        "sell": 15140000
+      },
+      {
+        "key": "nu_trang_9999",
+        "label": "Nữ Trang 9999",
+        "raw": "Nữ Trang 9999 - Bán Lẻ",
+        "buy": 14100000,
+        "sell": 14600000
+      },
+      {
+        "key": "nhan_9999",
+        "label": "Nhẫn 9999",
+        "raw": "NHẪN TRÒN 9999 HƯNG THỊNH VƯỢNG",
+        "buy": 14840000,
+        "sell": 15140000
+      }
+    ]
+  },
+  "yesterday": null
+}

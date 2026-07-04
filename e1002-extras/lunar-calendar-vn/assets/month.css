@@ -167,9 +167,18 @@ body {
 }
 
 /* Tag color by tier: VN-specific = red, world/UN day = blue. */
-.cell .fest-major       { color: #c00000; font-weight: 700; }
-.cell .fest-observance  { color: #c00000; font-weight: 600; }
-.cell .fest-world       { color: #003399; font-weight: 600; }
+.cell .fest-major {
+	color: #c00000;
+	font-weight: 700;
+}
+.cell .fest-observance {
+	color: #c00000;
+	font-weight: 600;
+}
+.cell .fest-world {
+	color: #003399;
+	font-weight: 600;
+}
 
 /* Sunday column (7th) — solar number red */
 .cell.sun .solar {
@@ -268,10 +277,21 @@ body {
 }
 
 /* Legend color coding: VN-specific = red, world/UN day = blue. */
-#legend .item-major    .name { color: #c00000; font-weight: 700; }
-#legend .item-observance .name { color: #c00000; font-weight: 500; }
-#legend .item-world    .name { color: #003399; font-weight: 500; }
-#legend .item-world    .day  { color: #003399; }
+#legend .item-major .name {
+	color: #c00000;
+	font-weight: 700;
+}
+#legend .item-observance .name {
+	color: #c00000;
+	font-weight: 500;
+}
+#legend .item-world .name {
+	color: #003399;
+	font-weight: 500;
+}
+#legend .item-world .day {
+	color: #003399;
+}
 
 #legend .empty {
 	color: #666666;
