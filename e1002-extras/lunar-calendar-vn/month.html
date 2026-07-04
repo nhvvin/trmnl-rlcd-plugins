@@ -1,32 +1,36 @@
 <!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=800, initial-scale=1">
-  <title>Lịch tháng — reTerminal E1002</title>
-  <link rel="stylesheet" href="assets/month.css">
-</head>
-<body>
-  <div id="page">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=800, initial-scale=1" />
+    <title>Lịch tháng — reTerminal E1002</title>
+    <link rel="stylesheet" href="assets/month.css?v=2" />
+  </head>
+  <body>
+    <div id="page">
+      <div id="header">
+        <div class="title" id="title">Tháng — · —</div>
+        <div class="meta" id="meta">—</div>
+      </div>
 
-    <div id="header">
-      <div class="title" id="title">Tháng — · —</div>
-      <div class="meta" id="meta">—</div>
+      <div id="weekdays">
+        <div>T2</div>
+        <div>T3</div>
+        <div>T4</div>
+        <div>T5</div>
+        <div>T6</div>
+        <div>T7</div>
+        <div class="sun">CN</div>
+      </div>
+
+      <div id="grid"></div>
+
+      <div id="legend"></div>
     </div>
 
-    <div id="weekdays">
-      <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div><div class="sun">CN</div>
-    </div>
+    <div id="debug-badge">DEBUG</div>
 
-    <div id="grid"></div>
-
-    <div id="legend"></div>
-
-  </div>
-
-  <div id="debug-badge">DEBUG</div>
-
-  <script src="assets/lunar.js"></script>
-  <script src="assets/month-render.js"></script>
-</body>
+    <script src="assets/lunar.js?v=2"></script>
+    <script src="assets/month-render.js?v=2"></script>
+  </body>
 </html>

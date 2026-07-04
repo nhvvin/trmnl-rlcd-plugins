@@ -6,6 +6,7 @@
 lunar-*.png
 month-*.png
 live-*.png
+day-*.png
 
 # Embedded firmware repo (lives in its own GitHub repo)
 # See: https://github.com/nhvvin/trmnl-waveshare-esp32-s3-rlcd-4.2

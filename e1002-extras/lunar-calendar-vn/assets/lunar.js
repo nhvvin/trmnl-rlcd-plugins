@@ -355,41 +355,105 @@
 
 	// ------------------------------------------------------------------
 	//  Festivals / holidays
-	//  kind: 'lunar' (âm), 'solar' (dương), 'observance' (không nghỉ nhưng phổ biến)
+	//  Each entry: { full: '...', short: '...', kind: '...' }
+	//    kind = 'major'       — lễ lớn / nghỉ lễ / văn hoá trọng điểm (màu đỏ nổi)
+	//    kind = 'observance'  — ngày kỷ niệm Việt Nam (không nghỉ nhưng phổ biến)
+	//    kind = 'world'       — International Day (LHQ / WHO / UNESCO...)
+	//
+	//  For cell display the `short` is used (must fit ~14 chars in month grid).
 	// ------------------------------------------------------------------
 
 	var LUNAR_FESTIVALS = {
-		"1/1": "Tết Nguyên Đán",
-		"2/1": "Mùng 2 Tết",
-		"3/1": "Mùng 3 Tết",
-		"15/1": "Rằm Tháng Giêng (Thượng Nguyên)",
-		"3/3": "Tết Hàn Thực",
-		"10/3": "Giỗ Tổ Hùng Vương",
-		"15/4": "Đại lễ Phật Đản",
-		"5/5": "Tết Đoan Ngọ",
-		"15/7": "Vu Lan Báo Hiếu",
-		"15/8": "Tết Trung Thu",
-		"9/9": "Tết Trùng Cửu",
-		"10/10": "Tết Thường Tân",
-		"15/10": "Tết Hạ Nguyên",
-		"23/12": "Ông Công Ông Táo",
+		"1/1":  { full: "Tết Nguyên Đán",              short: "Tết",         kind: "major" },
+		"2/1":  { full: "Mùng 2 Tết",                    short: "Mùng 2 Tết",  kind: "major" },
+		"3/1":  { full: "Mùng 3 Tết",                    short: "Mùng 3 Tết",  kind: "major" },
+		"4/1":  { full: "Hóa vàng",                       short: "Hóa vàng",    kind: "observance" },
+		"15/1": { full: "Rằm Tháng Giêng (Thượng Nguyên)", short: "Rằm Giêng",  kind: "major" },
+		"3/3":  { full: "Tết Hàn Thực (bánh trôi bánh chay)", short: "Hàn Thực",   kind: "major" },
+		"10/3": { full: "Giỗ Tổ Hùng Vương",                short: "Giỗ Tổ",      kind: "major" },
+		"8/4":  { full: "Lễ Tắm Phật",                     short: "Tắm Phật",    kind: "observance" },
+		"15/4": { full: "Đại lễ Phật Đản",                  short: "Phật Đản",   kind: "major" },
+		"5/5":  { full: "Tết Đoan Ngọ (diệt sâu bọ)",        short: "Đoan Ngọ",    kind: "major" },
+		"15/7": { full: "Vu Lan Báo Hiếu (Trung Nguyên)",   short: "Vu Lan",       kind: "major" },
+		"15/8": { full: "Tết Trung Thu",                    short: "Trung Thu",    kind: "major" },
+		"9/9":  { full: "Tết Trùng Cửu",                    short: "Trùng Cửu",   kind: "observance" },
+		"10/10":{ full: "Tết Thường Tân (cơm mới)",          short: "Thường Tân",  kind: "observance" },
+		"15/10":{ full: "Tết Hạ Nguyên",                    short: "Hạ Nguyên",   kind: "observance" },
+		"1/12": { full: "Lễ Tất Niên sớm (khởi cúng)",       short: "Tất Niên",    kind: "observance" },
+		"23/12":{ full: "Ông Công Ông Táo về trời",           short: "Ông Táo",      kind: "major" },
 	};
 
 	var SOLAR_HOLIDAYS = {
-		"1/1": "Tết Dương Lịch",
-		"14/2": "Valentine",
-		"8/3": "Quốc tế Phụ nữ",
-		"30/4": "Giải Phóng Miền Nam",
-		"1/5": "Quốc tế Lao động",
-		"1/6": "Quốc tế Thiếu nhi",
-		"27/7": "Ngày Thương binh Liệt sĩ",
-		"19/8": "Cách mạng Tháng Tám",
-		"2/9": "Quốc Khánh",
-		"20/10": "Phụ nữ Việt Nam",
-		"20/11": "Nhà giáo Việt Nam",
-		"22/12": "Quân đội Nhân dân",
-		"24/12": "Đêm Giáng sinh",
-		"25/12": "Giáng sinh",
+		// -------- Tháng 1 --------
+		"1/1":   { full: "Tết Dương Lịch",                        short: "Tết DL",         kind: "major" },
+		"9/1":   { full: "Ngày Sinh viên Việt Nam",                short: "Sinh viên VN",   kind: "observance" },
+		// -------- Tháng 2 --------
+		"3/2":   { full: "Thành lập Đảng Cộng sản Việt Nam",        short: "ĐCS VN",         kind: "observance" },
+		"14/2":  { full: "Valentine (Ngày Lễ Tình Nhân)",            short: "Valentine",      kind: "observance" },
+		"27/2":  { full: "Ngày Thầy thuốc Việt Nam",                short: "Thầy thuốc VN",  kind: "observance" },
+		// -------- Tháng 3 --------
+		"8/3":   { full: "Quốc tế Phụ nữ",                        short: "QT Phụ nữ",    kind: "major" },
+		"20/3":  { full: "Hạnh phúc Thế giới (UN)",                short: "Hạnh phúc",     kind: "world" },
+		"21/3":  { full: "Quốc tế Rừng",                          short: "Rừng QT",        kind: "world" },
+		"22/3":  { full: "Quốc tế Nước",                          short: "Nước QT",        kind: "world" },
+		"26/3":  { full: "Thành lập Đoàn TNCS Hồ Chí Minh",         short: "Đoàn TN",         kind: "observance" },
+		// -------- Tháng 4 --------
+		"1/4":   { full: "Cá tháng Tư (Ngày Nói Dối)",              short: "Cá Tháng Tư",   kind: "observance" },
+		"7/4":   { full: "Sức khoẻ Thế giới (WHO)",                short: "Sức khoẻ",       kind: "world" },
+		"21/4":  { full: "Ngày Sách Việt Nam",                     short: "Sách VN",        kind: "observance" },
+		"22/4":  { full: "Ngày Trái Đất",                          short: "Trái Đất",      kind: "world" },
+		"23/4":  { full: "Ngày Sách và Bản quyền Thế giới",         short: "Sách QT",        kind: "world" },
+		"30/4":  { full: "Giải Phóng Miền Nam",                    short: "Giải Phóng",    kind: "major" },
+		// -------- Tháng 5 --------
+		"1/5":   { full: "Quốc tế Lao động",                       short: "QT Lao động",   kind: "major" },
+		"3/5":   { full: "Tự do Báo chí Thế giới",                  short: "Tự do Báo chí",kind: "world" },
+		"7/5":   { full: "Chiến thắng Điện Biên Phủ",              short: "ĐB Phủ",         kind: "observance" },
+		"13/5":  { full: "Ngày của Mẹ (Chủ nhật 2 tháng 5)",       short: "Ngày của Mẹ",   kind: "observance" },
+		"15/5":  { full: "Thành lập Đội TNTP Hồ Chí Minh",           short: "Đội TNTP",        kind: "observance" },
+		"19/5":  { full: "Kỷ niệm sinh nhật Bác Hồ",               short: "Sinh nhật Bác", kind: "major" },
+		"31/5":  { full: "Không thuốc lá Thế giới (WHO)",           short: "Không thuốc lá",kind: "world" },
+		// -------- Tháng 6 --------
+		"1/6":   { full: "Quốc tế Thiếu nhi",                      short: "QT Thiếu nhi",  kind: "major" },
+		"5/6":   { full: "Môi trường Thế giới (UNEP)",              short: "Môi trường",     kind: "world" },
+		"17/6":  { full: "Ngày của Cha (Chủ nhật 3 tháng 6)",      short: "Ngày của Cha",  kind: "observance" },
+		"21/6":  { full: "Báo chí Cách mạng Việt Nam",              short: "Báo chí VN",     kind: "observance" },
+		"28/6":  { full: "Ngày Gia đình Việt Nam",                  short: "Gia đình VN",    kind: "observance" },
+		// -------- Tháng 7 --------
+		"11/7":  { full: "Dân số Thế giới (UN)",                    short: "Dân số QT",      kind: "world" },
+		"27/7":  { full: "Ngày Thương binh Liệt sĩ",                short: "TBLS",          kind: "major" },
+		"28/7":  { full: "Thành lập Công đoàn Việt Nam",             short: "Công đoàn VN",   kind: "observance" },
+		// -------- Tháng 8 --------
+		"12/8":  { full: "Quốc tế Thanh niên (UN)",                short: "QT Thanh niên",kind: "world" },
+		"19/8":  { full: "Cách mạng Tháng Tám",                    short: "CMT8",          kind: "major" },
+		// -------- Tháng 9 --------
+		"2/9":   { full: "Quốc Khánh Việt Nam",                     short: "Quốc Khánh",    kind: "major" },
+		"5/9":   { full: "Khai giảng năm học mới",                  short: "Khai giảng",     kind: "observance" },
+		"10/9":  { full: "Phòng chống tự tử Thế giới",             short: "Ph. tự tử",     kind: "world" },
+		"21/9":  { full: "Quốc tế Hòa bình (UN)",                    short: "Hòa bình QT",    kind: "world" },
+		// -------- Tháng 10 --------
+		"1/10":  { full: "Quốc tế Người cao tuổi",                 short: "NCT QT",         kind: "world" },
+		"5/10":  { full: "Quốc tế Nhà giáo",                       short: "Nhà giáo QT",    kind: "world" },
+		"10/10": { full: "Giải phóng Thủ đô Hà Nội",              short: "GP Thủ đô",     kind: "observance" },
+		"13/10": { full: "Ngày Doanh nhân Việt Nam",                short: "Doanh nhân VN", kind: "observance" },
+		"15/10": { full: "Hội LHTN Việt Nam",                      short: "HLHTN",         kind: "observance" },
+		"16/10": { full: "Lương thực Thế giới (FAO)",              short: "Lương thực",     kind: "world" },
+		"20/10": { full: "Phụ nữ Việt Nam",                        short: "PN Việt Nam",   kind: "major" },
+		"24/10": { full: "Ngày Liên Hợp Quốc",                    short: "LHQ",           kind: "world" },
+		"31/10": { full: "Halloween",                             short: "Halloween",     kind: "observance" },
+		// -------- Tháng 11 --------
+		"9/11":  { full: "Pháp luật Việt Nam",                     short: "Pháp luật VN",  kind: "observance" },
+		"14/11":  { full: "Đái tháo đường Thế giới",              short: "ĐTĐ QT",         kind: "world" },
+		"20/11": { full: "Nhà giáo Việt Nam",                       short: "Nhà giáo VN",    kind: "major" },
+		"23/11": { full: "Di sản Văn hoá Việt Nam",                 short: "Di sản VN",     kind: "observance" },
+		// -------- Tháng 12 --------
+		"1/12":  { full: "Thế giới Phòng chống AIDS",              short: "AIDS",          kind: "world" },
+		"3/12":  { full: "Quốc tế Người Khuyết tật",              short: "NKT QT",        kind: "world" },
+		"10/12": { full: "Nhân quyền Thế giới (UN)",                short: "Nhân quyền",     kind: "world" },
+		"19/12": { full: "Toàn quốc Kháng chiến",                  short: "TQ Kháng chiến",kind: "observance" },
+		"22/12": { full: "Quân đội Nhân dân Việt Nam",              short: "QP Toàn dân",  kind: "major" },
+		"24/12": { full: "Đêm Giáng sinh",                          short: "Noel",          kind: "observance" },
+		"25/12": { full: "Lễ Giáng sinh",                          short: "Giáng sinh",    kind: "major" },
+		"31/12": { full: "Tất niên Dương lịch",                    short: "Tất niên",      kind: "observance" },
 	};
 
 	function festival(dd, mm, yy, lunarDay, lunarMonth, lunarLeap) {
@@ -397,16 +461,16 @@
 		var lunarKey = lunarDay + "/" + lunarMonth;
 		var events = [];
 		if (SOLAR_HOLIDAYS[solarKey]) {
-			events.push({ name: SOLAR_HOLIDAYS[solarKey], kind: "solar" });
+			var s = SOLAR_HOLIDAYS[solarKey];
+			events.push({ full: s.full, short: s.short, kind: s.kind, calendar: "solar" });
 		}
 		if (!lunarLeap && LUNAR_FESTIVALS[lunarKey]) {
-			events.push({ name: LUNAR_FESTIVALS[lunarKey], kind: "lunar" });
+			var l = LUNAR_FESTIVALS[lunarKey];
+			events.push({ full: l.full, short: l.short, kind: l.kind, calendar: "lunar" });
 		}
 		// Giao Thừa: last day of lunar month 12 (29 or 30 depending on month length)
 		if (!lunarLeap && lunarMonth === 12) {
-			var next = solarToLunar(dd + 1 > 31 ? 1 : dd + 1, mm, yy);
-			// Simple check: tomorrow's lunar-day = 1 and month = 1 => today is Giao Thừa.
-			// Use JDN math instead to be robust across month boundaries.
+			// If the JDN of tomorrow maps to lunar 1/1, today is Giao Thừa (Tất Niên).
 			var tomorrowJd = jdFromDate(dd, mm, yy) + 1;
 			var tomorrow = jdToDate(tomorrowJd);
 			var tomorrowLunar = solarToLunar(
@@ -415,7 +479,12 @@
 				tomorrow.year,
 			);
 			if (tomorrowLunar.day === 1 && tomorrowLunar.month === 1) {
-				events.push({ name: "Giao Thừa (Tất Niên)", kind: "lunar" });
+				events.push({
+					full: "Giao Thừa (Tất Niên)",
+					short: "Giao Thừa",
+					kind: "major",
+					calendar: "lunar",
+				});
 			}
 		}
 		return events;

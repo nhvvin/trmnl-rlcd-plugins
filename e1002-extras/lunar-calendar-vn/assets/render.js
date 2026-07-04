@@ -83,7 +83,7 @@
 		);
 		var dayNumEl = document.getElementById("day-number");
 		dayNumEl.classList.toggle("sunday", isSunday);
-		dayNumEl.classList.toggle("holiday", events.length > 0);
+		// Actual `holiday` toggle happens below once we know the event tier.
 
 		// ---- Lunar block ----
 		set("lunar-day", pad2(lunar.day));
@@ -95,7 +95,12 @@
 		set("cc-day", L.canChiOfDay(sDate.day, sDate.month, sDate.year));
 
 		// Festival (join multiple with " · ")
-		set("festival", events.map((e) => e.name).join(" · "));
+		set("festival", events.map((e) => e.full).join("  ·  "));
+
+		// Highlight the big day number only for major-tier events so world
+		// observance days (Water Day, etc.) don't paint the number red.
+		var hasMajor = events.some((e) => e.kind === "major");
+		dayNumEl.classList.toggle("holiday", hasMajor);
 
 		// ---- Footer ----
 		var term = L.solarTerm(sDate.day, sDate.month, sDate.year);
