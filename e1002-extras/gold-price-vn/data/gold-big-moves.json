@@ -5,9 +5,10 @@
     "iso": "2026-07-04T16:15:00+07:00",
     "source": {
       "name": "DOJI",
-      "area": "Miền Trung",
-      "url": "https://update.giavang.doji.vn/banggia/doji_92411/92411",
-      "raw": "16:15 04-07-2026"
+      "area": "Miền Nam",
+      "url": "https://update.giavang.doji.vn/banggia/doji_92409/92409",
+      "raw": "16:15 04-07-2026",
+      "branch": "CHI NHÁNH HỒ CHÍ MINH"
     },
     "items": [
       {
@@ -39,9 +40,10 @@
     "iso": "2026-07-03T16:15:00+07:00",
     "source": {
       "name": "DOJI",
-      "area": "Miền Trung",
-      "url": "https://update.giavang.doji.vn/banggia/doji_92411/92411",
-      "raw": "16:15 03-07-2026"
+      "area": "Miền Nam",
+      "url": "https://update.giavang.doji.vn/banggia/doji_92409/92409",
+      "raw": "16:15 03-07-2026",
+      "branch": "CHI NHÁNH HỒ CHÍ MINH"
     },
     "items": [
       {

@@ -61,9 +61,11 @@ gọi `../../scripts/fetch-gold-price.mjs` (Node 20, không có dependency).
 
 ## Nguồn dữ liệu
 
-- **DOJI XML feed**: `https://update.giavang.doji.vn/banggia/doji_92411/92411`
-- Vùng: Miền Trung (Đà Nẵng/Huế) — feed này liệt kê cả giá SJC nên đủ
-  cho các loại vàng chuẩn quốc gia.
+- **DOJI XML feed**: `https://update.giavang.doji.vn/banggia/doji_92409/92409`
+- Vùng: **CHI NHÁNH HỒ CHÍ MINH · Miền Nam** — feed này liệt kê cả giá
+  SJC nên đủ cho các loại vàng chuẩn quốc gia.
+- Nếu muốn đổi sang chi nhánh Đà Nẵng, đổi endpoint sang
+  `doji_92411/92411` — WATCHED patterns đã match cả hai định dạng row-name.
 - Đơn vị lưu trong JSON: **VND / chỉ** (integer). Trong `fetch-gold-price.mjs`
   chúng ta nhân giá gốc (thousand VND per chỉ) với 1000.
 

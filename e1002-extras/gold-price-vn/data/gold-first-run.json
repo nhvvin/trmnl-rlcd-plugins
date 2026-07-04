@@ -5,9 +5,10 @@
     "iso": "2026-07-04T08:47:00+07:00",
     "source": {
       "name": "DOJI",
-      "area": "Miền Trung",
-      "url": "https://update.giavang.doji.vn/banggia/doji_92411/92411",
-      "raw": "08:47 04-07-2026"
+      "area": "Miền Nam",
+      "url": "https://update.giavang.doji.vn/banggia/doji_92409/92409",
+      "raw": "08:47 04-07-2026",
+      "branch": "CHI NHÁNH HỒ CHÍ MINH"
     },
     "items": [
       {
