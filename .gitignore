@@ -1,6 +1,10 @@
 # macOS noise
 .DS_Store
 
+# Playwright MCP snapshots — verification artefacts, not source
+.playwright-mcp/
+lunar-*.png
+
 # Embedded firmware repo (lives in its own GitHub repo)
 # See: https://github.com/nhvvin/trmnl-waveshare-esp32-s3-rlcd-4.2
 firmware/

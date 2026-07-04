@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=800, initial-scale=1" />
+    <title>Lịch Âm — reTerminal E1002</title>
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <div id="page">
+      <div id="header">
+        <div class="dow" id="dow">—</div>
+        <div class="solar-date" id="solar-date">—</div>
+      </div>
+
+      <div id="main">
+        <div id="today-block">
+          <div class="month-label" id="month-label">THÁNG —</div>
+          <div class="day-number" id="day-number">—</div>
+          <div class="year-label" id="year-label">—</div>
+        </div>
+
+        <div id="lunar-block">
+          <div class="section-label">Âm lịch</div>
+          <div class="lunar-day">
+            Ngày <span class="lunar-num" id="lunar-day">—</span> tháng
+            <span class="lunar-num" id="lunar-month">—</span>
+            <span id="leap-tag" class="leap-tag" hidden>Nhuận</span>
+          </div>
+          <div id="canchi-grid">
+            <div class="k">Năm</div>
+            <div class="v" id="cc-year">—</div>
+            <div class="k">Tháng</div>
+            <div class="v" id="cc-month">—</div>
+            <div class="k">Ngày</div>
+            <div class="v" id="cc-day">—</div>
+          </div>
+          <div id="festival"></div>
+        </div>
+      </div>
+
+      <div id="footer">
+        <div class="row tiet">
+          <div class="label">Tiết khí</div>
+          <div class="value" id="tiet-khi">—</div>
+        </div>
+        <div class="row hours">
+          <div class="label">Giờ hoàng đạo</div>
+          <div class="value" id="lucky-hours">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="debug-badge">DEBUG</div>
+
+    <script src="assets/lunar.js"></script>
+    <script src="assets/render.js"></script>
+  </body>
+</html>

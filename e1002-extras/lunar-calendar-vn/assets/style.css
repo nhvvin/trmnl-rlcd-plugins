@@ -1,0 +1,245 @@
+/*
+ * Vietnamese Lunar Calendar — reTerminal E1002 (800×480, Spectra 6 ePaper)
+ *
+ * Colour palette limited to the 6 native Spectra 6 pigments to avoid muddy
+ * dithering:  #000 black, #FFF white, #C00 red, #E0B000 yellow, #003399 blue,
+ * #006e2c green.  Anything outside this palette will be dithered by the driver
+ * and lose sharpness on text edges.
+ *
+ * The whole layout is 800×480 with no scrollbars.  Scaled 1:1 in the browser
+ * preview so what you see is what the device sees.
+ */
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	-webkit-font-smoothing: none;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: geometricPrecision;
+}
+
+/* HTML `hidden` attribute must win over explicit display values below. */
+[hidden] {
+	display: none !important;
+}
+
+html,
+body {
+	width: 800px;
+	height: 480px;
+	overflow: hidden;
+	background: #ffffff;
+	color: #000000;
+	font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+	font-weight: 500;
+	line-height: 1;
+}
+
+/* ------------------------------------------------------------------
+ *  Layout skeleton  (2 rows, bottom row split into two columns)
+ * ------------------------------------------------------------------ */
+
+#page {
+	width: 800px;
+	height: 480px;
+	display: grid;
+	grid-template-rows: 60px 1fr 90px;
+	grid-template-columns: 1fr;
+}
+
+/* -----------------------------  HEADER  ----------------------------- */
+
+#header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 24px;
+	background: #003399;
+	color: #ffffff;
+}
+
+#header .dow {
+	font-size: 32px;
+	font-weight: 700;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+}
+
+#header .solar-date {
+	font-size: 24px;
+	font-weight: 500;
+}
+
+/* -----------------------------  MAIN  ------------------------------ */
+
+#main {
+	display: grid;
+	grid-template-columns: 320px 1fr;
+	border-bottom: 2px solid #000000;
+}
+
+/* Left: giant day number */
+#today-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	border-right: 2px solid #000000;
+	padding: 12px;
+}
+
+#today-block .month-label {
+	font-size: 24px;
+	font-weight: 700;
+	letter-spacing: 4px;
+	text-transform: uppercase;
+	color: #003399;
+	margin-bottom: 4px;
+}
+
+#today-block .day-number {
+	font-size: 220px;
+	font-weight: 900;
+	line-height: 1;
+	color: #000000;
+}
+
+#today-block .day-number.sunday,
+#today-block .day-number.holiday {
+	color: #c00000;
+}
+
+#today-block .year-label {
+	font-size: 20px;
+	font-weight: 500;
+	margin-top: 6px;
+	color: #333333;
+}
+
+/* Right: lunar detail */
+#lunar-block {
+	display: grid;
+	grid-template-rows: auto auto 1fr auto;
+	padding: 18px 24px;
+	gap: 10px;
+}
+
+#lunar-block .section-label {
+	font-size: 15px;
+	font-weight: 700;
+	letter-spacing: 3px;
+	text-transform: uppercase;
+	color: #003399;
+}
+
+#lunar-block .lunar-day {
+	font-size: 48px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+#lunar-block .lunar-day .lunar-num {
+	color: #c00000;
+}
+
+#lunar-block .lunar-day .leap-tag {
+	display: inline-block;
+	font-size: 18px;
+	font-weight: 600;
+	color: #ffffff;
+	background: #c00000;
+	padding: 2px 6px;
+	margin-left: 6px;
+	vertical-align: middle;
+	border-radius: 2px;
+}
+
+#canchi-grid {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: 14px;
+	row-gap: 6px;
+	font-size: 20px;
+}
+
+#canchi-grid .k {
+	color: #333333;
+	font-weight: 500;
+}
+
+#canchi-grid .v {
+	font-weight: 700;
+	color: #000000;
+}
+
+#festival {
+	min-height: 30px;
+	font-size: 20px;
+	font-weight: 700;
+	color: #c00000;
+}
+
+#festival:empty {
+	display: none;
+}
+
+/* -----------------------------  FOOTER  ---------------------------- */
+
+#footer {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	padding: 10px 24px;
+	gap: 8px 24px;
+	font-size: 16px;
+}
+
+#footer .row {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+}
+
+#footer .row .label {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	color: #003399;
+	flex-shrink: 0;
+	min-width: 120px;
+}
+
+#footer .row .value {
+	font-size: 16px;
+	font-weight: 600;
+	color: #000000;
+}
+
+#footer .tiet .value.starts {
+	color: #006e2c;
+}
+
+#footer .hours .value {
+	color: #006e2c;
+	font-weight: 600;
+}
+
+/* -----------------------------  DEBUG BADGE ------------------------ */
+
+#debug-badge {
+	position: fixed;
+	top: 4px;
+	right: 4px;
+	background: #e0b000;
+	color: #000000;
+	font-size: 11px;
+	font-weight: 700;
+	padding: 2px 6px;
+	border-radius: 2px;
+	display: none;
+}
+
+body.debug #debug-badge {
+	display: block;
+}

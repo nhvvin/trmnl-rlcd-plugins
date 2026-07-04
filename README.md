@@ -1,24 +1,31 @@
 # trmnl-rlcd-plugins
 
-TRMNL BYOS plugins targeting the **Waveshare ESP32-S3-RLCD-4.2** board (Reflective LCD ST7305, monochrome 400×300, 1-bit).
+TRMNL BYOS plugins targeting the **Waveshare ESP32-S3-RLCD-4.2** board (ST7305, monochrome 400×300, 1-bit), plus **SenseCraft HMI Web Content** pages targeting **Seeed Studio reTerminal E1002** (7.3" color Spectra 6, 800×480).
 
-This is the **plugins / dashboard** side. The **firmware** lives in a separate repo:
+This is the **plugins / dashboard** side. The Waveshare **firmware** lives in a separate repo:
 👉 <https://github.com/nhvvin/trmnl-waveshare-esp32-s3-rlcd-4.2>
 
 ## Layout
 
 ```
-firmware-extras/
-└── trmnl-vn-stock/   # Vietnam stock dashboard plugin (importable .zip for Terminus)
-    ├── liquid/        # Liquid template + settings.yml
-    ├── preview/       # Static HTML / BMP / PNG preview for verification
-    ├── dist/          # Built .zip ready to import into Terminus
-    └── build_zip.rb   # Local build script (Terminus-compatible bundle)
+firmware-extras/        # Waveshare RLCD 4.2 — TRMNL Liquid plugins
+└── trmnl-vn-stock/
+    ├── liquid/         # Liquid template + settings.yml
+    ├── preview/        # Static HTML / BMP / PNG preview for verification
+    ├── dist/           # Built .zip ready to import into Terminus
+    └── build_zip.rb    # Local build script (Terminus-compatible bundle)
+
+e1002-extras/           # reTerminal E1002 — SenseCraft HMI Web Content pages
+└── lunar-calendar-vn/  # Vietnamese lunar calendar (dương/âm/Can Chi/lễ/tiết khí)
+    ├── index.html      # single page deployed via SenseCraft HMI Web Content
+    ├── preview.html    # desktop grid preview with 6 test dates
+    └── assets/         # style.css, lunar.js (Hồ Ngọc Đức), render.js
 ```
 
 ## Companion server
 
-These plugins are built for the [Terminus](https://github.com/usetrmnl/byos_hanami) BYOS server.
+The `firmware-extras/*` plugins target the [Terminus](https://github.com/usetrmnl/byos_hanami) BYOS server.
+The `e1002-extras/*` pages are static HTML — no server needed beyond a static host (GitHub Pages, Netlify, LAN).
 
 ## Status / known gotchas
 
