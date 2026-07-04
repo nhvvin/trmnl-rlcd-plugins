@@ -54,42 +54,51 @@
     <h1>Preview — Lịch Âm cho reTerminal E1002 (800×480)</h1>
     <p>
       Mỗi ô là 1 iframe hiển thị đúng vùng render 800×480 mà thiết bị sẽ nhận.
-      Có 1 trang cho hôm nay và 5 trang cho các ngày lễ tiêu biểu để kiểm tra.
+      Trang <code>index.html</code> là <b>1 ngày</b>; trang <code>month.html</code> là
+      <b>lịch tháng</b>. Cả hai dùng chung <code>lunar.js</code>.
     </p>
     <div class="toc">
       Mở riêng:
-      <a href="index.html" target="_blank">hôm nay</a>
-      <a href="index.html?date=2025-01-29" target="_blank">Tết 2025</a>
-      <a href="index.html?date=2025-04-07" target="_blank">Giỗ Tổ 2025</a>
-      <a href="index.html?date=2025-10-06" target="_blank">Trung Thu 2025</a>
-      <a href="index.html?date=2026-02-17" target="_blank">Tết 2026</a>
-      <a href="index.html?date=2027-01-30" target="_blank">Ông Táo 2026 âm</a>
+      <a href="index.html" target="_blank">hôm nay (ngày)</a>
+      <a href="month.html" target="_blank">hôm nay (tháng)</a>
+      <a href="month.html?month=2026-02" target="_blank">02/2026 (Tết Bính Ngọ)</a>
+      <a href="month.html?month=2025-01" target="_blank">01/2025 (Tết Ất Tỵ)</a>
+      <a href="month.html?month=2025-10" target="_blank">10/2025 (Trung Thu)</a>
+      <a href="index.html?date=2025-01-29" target="_blank">Tết 2025 (ngày)</a>
     </div>
 
     <div class="grid">
       <div class="card">
-        <header>Hôm nay</header>
+        <header>Hôm nay · ngày</header>
         <iframe src="index.html?debug=1"></iframe>
       </div>
       <div class="card">
-        <header>2025-01-29 · Tết Nguyên Đán Ất Tỵ · Thứ tư</header>
+        <header>Hôm nay · tháng</header>
+        <iframe src="month.html?debug=1"></iframe>
+      </div>
+      <div class="card">
+        <header>Tháng 02/2026 · Tết Bính Ngọ (17/2)</header>
+        <iframe src="month.html?date=2026-02-17&debug=1"></iframe>
+      </div>
+      <div class="card">
+        <header>Tháng 01/2025 · Tết Ất Tỵ (29/1)</header>
+        <iframe src="month.html?date=2025-01-29&debug=1"></iframe>
+      </div>
+      <div class="card">
+        <header>Tháng 10/2025 · Trung Thu (6/10)</header>
+        <iframe src="month.html?date=2025-10-06&debug=1"></iframe>
+      </div>
+      <div class="card">
+        <header>Tháng 07/2026 · không có lễ lớn</header>
+        <iframe src="month.html?month=2026-07&debug=1"></iframe>
+      </div>
+      <div class="card">
+        <header>2025-01-29 · Tết Ất Tỵ (ngày)</header>
         <iframe src="index.html?date=2025-01-29&debug=1"></iframe>
       </div>
       <div class="card">
-        <header>2025-04-07 · Giỗ Tổ 10/3 âm · Thứ hai</header>
-        <iframe src="index.html?date=2025-04-07&debug=1"></iframe>
-      </div>
-      <div class="card">
-        <header>2025-10-06 · Trung Thu 15/8 âm · Thứ hai</header>
+        <header>2025-10-06 · Trung Thu (ngày)</header>
         <iframe src="index.html?date=2025-10-06&debug=1"></iframe>
-      </div>
-      <div class="card">
-        <header>2026-02-17 · Tết Nguyên Đán Bính Ngọ · Thứ ba</header>
-        <iframe src="index.html?date=2026-02-17&debug=1"></iframe>
-      </div>
-      <div class="card">
-        <header>2027-01-30 · 23/12 âm · Ông Công Ông Táo</header>
-        <iframe src="index.html?date=2027-01-30&debug=1"></iframe>
       </div>
     </div>
   </body>

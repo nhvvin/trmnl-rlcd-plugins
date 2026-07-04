@@ -50,17 +50,21 @@ python3 -m http.server 8000    # hoặc `npx serve` / `php -S`
 
 Sau đó mở:
 
-- `http://localhost:8000/preview.html` — grid 6 iframes với các ngày lễ tiêu biểu
-- `http://localhost:8000/index.html` — hôm nay (đúng vùng 800×480 mà thiết bị nhận)
-- `http://localhost:8000/index.html?date=2025-01-29` — Tết Nguyên Đán 2025
-- `http://localhost:8000/index.html?date=2025-10-06&debug=1` — Trung Thu 2025, badge debug bật
+- `http://localhost:8000/preview.html` — grid 8 iframes với các ngày lễ tiêu biểu
+- `http://localhost:8000/index.html` — hôm nay, view **1 ngày** (đúng vùng 800×480)
+- `http://localhost:8000/month.html` — hôm nay, view **1 tháng**
+- `http://localhost:8000/index.html?date=2025-01-29` — Tết Nguyên Đán 2025 (ngày)
+- `http://localhost:8000/month.html?month=2026-02` — cả tháng Tết 2026
+- `http://localhost:8000/month.html?date=2025-10-06&debug=1` — tháng 10/2025 highlight Trung Thu
 
-Query params hỗ trợ:
+Query params:
 
-| param  | mô tả                             |
-|--------|-----------------------------------|
-| `date` | `YYYY-MM-DD` — override ngày hôm nay để test |
-| `debug`| Bật badge vàng góc phải hiển thị ngày đang render |
+| Trang        | param             | mô tả                                            |
+|--------------|-------------------|--------------------------------------------------|
+| index.html   | `date=YYYY-MM-DD` | override ngày hôm nay                            |
+| month.html   | `month=YYYY-MM`   | chọn tháng (không highlight ngày nào)            |
+| month.html   | `date=YYYY-MM-DD` | chọn tháng chứa ngày này + highlight ngày đó     |
+| cả hai       | `debug=1`         | badge vàng góc phải hiển thị ngày đang render     |
 
 ## Deploy — Cách 1: GitHub Pages (miễn phí, HTTPS, khuyên dùng)
 
@@ -71,11 +75,18 @@ Repo hiện tại là `nhvvin/trmnl-rlcd-plugins`. Bật GitHub Pages một lầ
 3. Source: chọn **Deploy from a branch**, branch = `main`, folder = `/ (root)`.
 4. Save. Đợi ~1 phút, GitHub sẽ báo URL kiểu:
    `https://nhvvin.github.io/trmnl-rlcd-plugins/`
-5. URL trang lịch âm sẽ là:
+5. URL các trang lịch âm:
 
    ```
+   # view 1 ngày
    https://nhvvin.github.io/trmnl-rlcd-plugins/e1002-extras/lunar-calendar-vn/
+
+   # view 1 tháng
+   https://nhvvin.github.io/trmnl-rlcd-plugins/e1002-extras/lunar-calendar-vn/month.html
    ```
+
+> Chọn URL nào cho SenseCraft HMI tuỳ bạn — hoặc 1 URL cố định, hoặc cấu
+> hình nhiều "scenes" luân phiên nếu firmware hỗ trợ.
 
 > Nếu bạn không muốn public repo, dùng **Cách 2** bên dưới.
 

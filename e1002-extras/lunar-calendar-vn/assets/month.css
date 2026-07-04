@@ -1,0 +1,278 @@
+/*
+ * Full-month grid for reTerminal E1002 (7.3", 800x480, Spectra 6).
+ *
+ * Layout budget (px)                          800x480 total
+ *   header ...................... 52
+ *   weekday row ................. 24
+ *   6 grid rows x 58 ............ 348
+ *   legend row .................. 56
+ *                                 ---
+ *                                 480
+ *
+ * The grid always renders 6 rows so the row height never jumps between
+ * months (some months only need 4-5, but we pad with next-month days
+ * rendered in gray).
+ *
+ * Palette limited to the 6 Spectra pigments:
+ *   #000 black, #fff white, #c00000 red, #003399 blue,
+ *   #006e2c green, #e0b000 yellow.
+ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+/* HTML `hidden` attribute must win over explicit display values. */
+[hidden] {
+  display: none !important;
+}
+
+html, body {
+  width: 800px;
+  height: 480px;
+  overflow: hidden;
+  background: #ffffff;
+  color: #000000;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1;
+}
+
+#page {
+  width: 800px;
+  height: 480px;
+  display: grid;
+  grid-template-rows: 52px 24px 348px 56px;
+  grid-template-columns: 1fr;
+}
+
+/* -----------------------------  HEADER  ---------------------------- */
+
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: #003399;
+  color: #ffffff;
+}
+
+#header .title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+#header .meta {
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  line-height: 1.25;
+}
+
+#header .meta strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* -----------------------------  WEEKDAYS  -------------------------- */
+
+#weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 2px solid #000000;
+  border-top: 2px solid #000000;
+}
+
+#weekdays > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #003399;
+  border-right: 1px solid #000000;
+}
+
+#weekdays > div:last-child {
+  border-right: 0;
+}
+
+#weekdays > .sun {
+  color: #c00000;
+}
+
+/* -----------------------------  GRID  ------------------------------ */
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.cell {
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  padding: 4px 6px 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cell:nth-child(7n) {
+  border-right: 0;
+}
+
+.cell:nth-child(n+36) {
+  /* last row (indexes 36..42) — no bottom border */
+  border-bottom: 0;
+}
+
+.cell .solar {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  color: #000000;
+}
+
+.cell .lunar {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #c00000;
+}
+
+.cell .fest {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #c00000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sunday column (7th) — solar number red */
+.cell.sun .solar {
+  color: #c00000;
+}
+
+/* Days from previous/next month — grayed out */
+.cell.other .solar,
+.cell.other .lunar {
+  color: #999999;
+  font-weight: 500;
+}
+
+.cell.other .fest {
+  display: none;
+}
+
+/* Highlighted day (today) */
+.cell.today {
+  background: #003399;
+}
+
+.cell.today .solar {
+  color: #ffffff;
+}
+
+.cell.today .lunar {
+  color: #e0b000;
+}
+
+.cell.today .fest {
+  color: #e0b000;
+}
+
+/* Lunar day 1 (đầu tháng âm) — show month tag too */
+.cell .lunar.first {
+  font-size: 11px;
+  background: #c00000;
+  color: #ffffff;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.cell.today .lunar.first {
+  background: #e0b000;
+  color: #000000;
+}
+
+/* On grayed prev/next-month cells the pill is visually loud; tone it down. */
+.cell.other .lunar.first {
+  background: transparent;
+  color: #999999;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* -----------------------------  LEGEND  ---------------------------- */
+
+#legend {
+  display: flex;
+  align-items: center;
+  gap: 14px 24px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  font-size: 12px;
+  border-top: 2px solid #000000;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+#legend .item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+#legend .item .day {
+  font-weight: 700;
+  color: #003399;
+  min-width: 22px;
+  text-align: right;
+}
+
+#legend .item .name {
+  color: #c00000;
+  font-weight: 600;
+}
+
+#legend .empty {
+  color: #666666;
+  font-style: italic;
+}
+
+/* -----------------------------  DEBUG BADGE ------------------------ */
+
+#debug-badge {
+  position: fixed;
+  top: 4px;
+  right: 4px;
+  background: #e0b000;
+  color: #000000;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+  display: none;
+}
+
+body.debug #debug-badge {
+  display: block;
+}
