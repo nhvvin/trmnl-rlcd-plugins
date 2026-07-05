@@ -2,39 +2,28 @@
   TRMNL — Vàng DOJI Việt Nam (RLCD 1-bit)
 
   Source: https://giavang.doji.vn/api/prices  (XML, no Cloudflare)
-  Poll every 30 min. Response is text/xml; Terminus stores it raw in
-  `source_1.body`. We string-parse XML via Liquid `split` filter since
-  stock Liquid has no XML parser.
+  Poll every 30 min.
 
-  DOJI XML layout (excerpt):
-    <GoldList>
-      <DGPlist>
-        <DateTime>...</DateTime>
-        <Row Name='DOJI HN lẻ' Sell='151,400' Buy='148,400' />   (nghìn₫/lượng)
-        <Row Name='DOJI HCM lẻ' Sell='15,140'  Buy='14,840' />   (nghìn₫/chỉ)
-        ...
-      </DGPlist>
-      <IGPList><DateTime>...</DateTime> <Row Name='USD/VND' .../></IGPList>
-      <JewelryList>
-        <Row Name='Vàng 24k (nghìn/chỉ)' Sell='14,600' Buy='14,100' />
-        <Row Name='Giá Nguyên Liệu 18K'  Sell='-'      Buy='10,095' />
-        <Row Name='Giá Nguyên Liệu 14K'  Sell='-'      Buy='7,656'  />
-        <Row Name='Nhẫn Tròn 9999 Hưng Thịnh Vượng' Sell='15,140' Buy='14,840' />
-        ...
-      </JewelryList>
-    </GoldList>
+  ⚠ IMPORTANT: Terminus auto-parses XML into JSON. Structure:
+    source_1.GoldList.DGPlist.Row       -> Array<{@Name,@Buy,@Sell,@Key}>
+    source_1.GoldList.JewelryList.Row   -> Array<{@Name,@Buy,@Sell,@Key}>
+    source_1.GoldList.IGPList.DateTime  -> "17:16 05/07/2026"
+    source_1.GoldList.IGPList.Row       -> Hash (single obj) USD/VND
 
-  Layout (400x300):
-    Header:   GIÁ VÀNG DOJI · <IGPList DateTime>
-    Column:   LOẠI · MUA · BÁN
-    6 rows (all nghìn₫/chỉ):
-      1. Vàng miếng SJC · HCM lẻ
-      2. Vàng miếng SJC · HCM buôn
-      3. Nhẫn 9999 Hưng Thịnh Vượng
-      4. Vàng 24K nữ trang
-      5. Nguyên liệu 18K
-      6. Nguyên liệu 14K
-    Footer:   Đơn vị 1000₫/chỉ · giavang.doji.vn
+  Attributes use "@" prefix (XML→JSON convention). Access in Liquid:
+    row["@Buy"]  or  compare row["@Name"] == "..."
+
+  DGPlist HCM rows are in nghìn₫/chỉ.
+  JewelryList HCM rows are in nghìn₫/lượng (same name, DIFFERENT unit!).
+  We always pull HCM rows from DGPlist to keep everything in chỉ.
+
+  6 rows (all nghìn₫/chỉ):
+    1. Vàng miếng SJC · HCM lẻ    (DGPlist)
+    2. Vàng miếng SJC · HCM buôn  (DGPlist)
+    3. Nhẫn 9999 Hưng Thịnh Vượng (JewelryList @Key=nhanhung1chi)
+    4. Vàng 24K nữ trang          (JewelryList @Key=vang24k)
+    5. Nguyên liệu 18K            (JewelryList @Key=vang18k)
+    6. Nguyên liệu 14K            (JewelryList @Key=vang14k)
 -->
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -91,58 +80,49 @@
 </style>
 
 {%- comment -%}
-  Grab raw XML body. Terminus stores response text at source_1.body when
-  content-type is not JSON.
+  Init all row values to "-" so missing data renders cleanly.
 {%- endcomment -%}
-{% assign body = source_1.body %}
+{% assign r1_buy = "-" %}{% assign r1_sell = "-" %}
+{% assign r2_buy = "-" %}{% assign r2_sell = "-" %}
+{% assign r3_buy = "-" %}{% assign r3_sell = "-" %}
+{% assign r4_buy = "-" %}{% assign r4_sell = "-" %}
+{% assign r5_buy = "-" %}{% assign r5_sell = "-" %}
+{% assign r6_buy = "-" %}{% assign r6_sell = "-" %}
 
 {%- comment -%}
-  Isolate the two XML blocks. This is important because DOJI reuses the
-  same Name (e.g. "DOJI HCM lẻ") in BOTH DGPlist (unit: nghìn₫/chỉ)
-  and JewelryList (unit: nghìn₫/lượng). We want everything in nghìn₫/chỉ,
-  so we always pull miếng rows from DGPlist and nhẫn/24K/18K/14K from
-  JewelryList.
+  Scan DGPlist for miếng HCM lẻ / HCM buôn (nghìn₫/chỉ).
 {%- endcomment -%}
-{% assign dgp = body | split: "<DGPlist>" | last | split: "</DGPlist>" | first %}
-{% assign jl  = body | split: "<JewelryList>" | last | split: "</JewelryList>" | first %}
+{% for r in source_1.GoldList.DGPlist.Row %}
+  {% if r["@Name"] == "DOJI HCM lẻ" %}
+    {% assign r1_buy = r["@Buy"] %}
+    {% assign r1_sell = r["@Sell"] %}
+  {% elsif r["@Name"] == "DOJI HCM buôn" %}
+    {% assign r2_buy = r["@Buy"] %}
+    {% assign r2_sell = r["@Sell"] %}
+  {% endif %}
+{% endfor %}
 
 {%- comment -%}
-  Extract IGPList DateTime (the freshest timestamp DOJI publishes).
-  Structure: <IGPList><DateTime>17:16 05/07/2026</DateTime>...
+  Scan JewelryList for nhẫn 9999 / 24k / 18k / 14k by stable @Key.
+  Using @Key (ASCII) is safer than @Name (Vietnamese diacritics).
 {%- endcomment -%}
-{% assign igp = body | split: "<IGPList>" | last | split: "</DateTime>" | first %}
-{% assign ts = igp | split: "<DateTime>" | last | strip %}
+{% for r in source_1.GoldList.JewelryList.Row %}
+  {% if r["@Key"] == "nhanhung1chi" %}
+    {% assign r3_buy = r["@Buy"] %}
+    {% assign r3_sell = r["@Sell"] %}
+  {% elsif r["@Key"] == "vang24k" %}
+    {% assign r4_buy = r["@Buy"] %}
+    {% assign r4_sell = r["@Sell"] %}
+  {% elsif r["@Key"] == "vang18k" %}
+    {% assign r5_buy = r["@Buy"] %}
+    {% assign r5_sell = r["@Sell"] %}
+  {% elsif r["@Key"] == "vang14k" %}
+    {% assign r6_buy = r["@Buy"] %}
+    {% assign r6_sell = r["@Sell"] %}
+  {% endif %}
+{% endfor %}
 
-{%- comment -%}
-  Row extractor pattern (all rows below are nghìn₫/chỉ):
-    * DGPlist:      DOJI HCM lẻ / DOJI HCM buôn
-    * JewelryList:  Nhẫn Tròn 9999 Hưng Thịnh Vượng /
-                    Vàng 24k (nghìn/chỉ) / Nguyên liệu 18K / Nguyên liệu 14K
-{%- endcomment -%}
-
-{% assign _r1 = dgp | split: "Name='DOJI HCM lẻ'" | last | split: "/>" | first %}
-{% assign r1_sell = _r1 | split: "Sell='" | last | split: "'" | first %}
-{% assign r1_buy  = _r1 | split: "Buy='"  | last | split: "'" | first %}
-
-{% assign _r2 = dgp | split: "Name='DOJI HCM buôn'" | last | split: "/>" | first %}
-{% assign r2_sell = _r2 | split: "Sell='" | last | split: "'" | first %}
-{% assign r2_buy  = _r2 | split: "Buy='"  | last | split: "'" | first %}
-
-{% assign _r3 = jl | split: "Name='Nhẫn Tròn 9999 Hưng Thịnh Vượng'" | last | split: "/>" | first %}
-{% assign r3_sell = _r3 | split: "Sell='" | last | split: "'" | first %}
-{% assign r3_buy  = _r3 | split: "Buy='"  | last | split: "'" | first %}
-
-{% assign _r4 = jl | split: "Name='Vàng 24k (nghìn/chỉ)'" | last | split: "/>" | first %}
-{% assign r4_sell = _r4 | split: "Sell='" | last | split: "'" | first %}
-{% assign r4_buy  = _r4 | split: "Buy='"  | last | split: "'" | first %}
-
-{% assign _r5 = jl | split: "Name='Giá Nguyên Liệu 18K'" | last | split: "/>" | first %}
-{% assign r5_sell = _r5 | split: "Sell='" | last | split: "'" | first %}
-{% assign r5_buy  = _r5 | split: "Buy='"  | last | split: "'" | first %}
-
-{% assign _r6 = jl | split: "Name='Giá Nguyên Liệu 14K'" | last | split: "/>" | first %}
-{% assign r6_sell = _r6 | split: "Sell='" | last | split: "'" | first %}
-{% assign r6_buy  = _r6 | split: "Buy='"  | last | split: "'" | first %}
+{% assign ts = source_1.GoldList.IGPList.DateTime | default: "" %}
 
 <div class="card">
   <div class="hdr">
