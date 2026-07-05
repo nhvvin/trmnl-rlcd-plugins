@@ -1,0 +1,23 @@
+---
+description: "Free weather from Open-Meteo, no API key. RLCD 1-bit friendly."
+label: "Weather (Open-Meteo)"
+name: "weather"
+version: "1.0.0"
+kind: "poll"
+mode: "text"
+interval: 15
+unit: "minute"
+polling_url: |
+  https://api.open-meteo.com/v1/forecast?latitude={{ trmnl.plugin_settings.custom_fields_values.lat | default: '10.7748' }}&longitude={{ trmnl.plugin_settings.custom_fields_values.lon | default: '106.7833' }}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=7
+polling_verb: get
+custom_fields:
+  - keyname: lat
+    field_type: string
+    name: Latitude
+    description: "Decimal latitude (e.g. 10.7748 for Ho Chi Minh City)."
+    default: "10.7748"
+  - keyname: lon
+    field_type: string
+    name: Longitude
+    description: "Decimal longitude (e.g. 106.7833 for Ho Chi Minh City)."
+    default: "106.7833"

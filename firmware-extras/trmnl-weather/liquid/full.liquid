@@ -1,0 +1,103 @@
+<div style="width:400px;height:300px;background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-weight:700;-webkit-font-smoothing:none;text-rendering:geometricPrecision;padding:6px 8px;box-sizing:border-box;display:flex;flex-direction:column;">
+
+  {%- assign cur    = source_1.current -%}
+  {%- assign daily  = source_1.daily -%}
+  {%- assign tz     = source_1.timezone | replace: "_", " " | upcase -%}
+
+  {%- comment %} WMO code -> short label (uppercase, ASCII) {% endcomment -%}
+  {%- capture cond -%}
+    {%- case cur.weather_code -%}
+      {%- when 0 -%}CLEAR
+      {%- when 1 -%}MOSTLY CLEAR
+      {%- when 2 -%}PARTLY CLOUDY
+      {%- when 3 -%}CLOUDS
+      {%- when 45, 48 -%}FOG
+      {%- when 51, 53, 55 -%}DRIZZLE
+      {%- when 56, 57 -%}FRZ DRIZZLE
+      {%- when 61, 63, 65 -%}RAIN
+      {%- when 66, 67 -%}FRZ RAIN
+      {%- when 71, 73, 75, 77 -%}SNOW
+      {%- when 80, 81, 82 -%}SHOWERS
+      {%- when 85, 86 -%}SNOW SHOWERS
+      {%- when 95 -%}THUNDERSTORM
+      {%- when 96, 99 -%}TSTM + HAIL
+      {%- else -%}WX {{ cur.weather_code }}
+    {%- endcase -%}
+  {%- endcapture -%}
+
+  {%- comment %} 3-letter short codes for forecast strip {% endcomment -%}
+  {%- capture short_codes -%}
+    {%- for c in daily.weather_code -%}
+      {%- case c -%}
+        {%- when 0 -%}CLR
+        {%- when 1, 2 -%}FEW
+        {%- when 3 -%}CLD
+        {%- when 45, 48 -%}FOG
+        {%- when 51, 53, 55, 56, 57 -%}DRZ
+        {%- when 61, 63, 65, 66, 67 -%}RAIN
+        {%- when 71, 73, 75, 77 -%}SNW
+        {%- when 80, 81, 82 -%}SHW
+        {%- when 85, 86 -%}SNS
+        {%- when 95 -%}TS
+        {%- when 96, 99 -%}TSH
+        {%- else -%}--
+      {%- endcase -%}|
+    {%- endfor -%}
+  {%- endcapture -%}
+  {%- assign code_arr = short_codes | split: "|" -%}
+
+  <!-- HEADER: location + timestamp -->
+  <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:3px;">
+    <div style="font-size:20px;font-weight:900;letter-spacing:0.5px;">{{ tz }}</div>
+    <div style="font-family:Menlo,'Courier New',monospace;font-size:13px;font-weight:700;">{{ cur.time | date: "%a %d/%m %H:%M" }}</div>
+  </div>
+
+  <!-- HERO: big temperature + condition + feels-like -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:2px solid #000;">
+    <div style="font-family:Menlo,'Courier New',monospace;font-size:64px;font-weight:900;line-height:1;">{{ cur.temperature_2m | round }}&deg;</div>
+    <div style="text-align:right;line-height:1.15;">
+      <div style="font-size:18px;font-weight:900;">{{ cond | strip }}</div>
+      <div style="font-size:14px;font-weight:700;margin-top:4px;">FEELS <span style="font-family:Menlo,'Courier New',monospace;">{{ cur.apparent_temperature | round }}&deg;</span></div>
+      {%- if cur.is_day == 0 -%}
+        <div style="font-size:12px;font-weight:900;margin-top:2px;">&middot; NIGHT &middot;</div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- METRICS: humidity / wind / sunrise / sunset -->
+  <div style="display:flex;justify-content:space-between;padding:4px 2px;border-bottom:2px solid #000;text-align:center;">
+    <div style="flex:1;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1px;">HUMID</div>
+      <div style="font-family:Menlo,'Courier New',monospace;font-size:18px;font-weight:900;">{{ cur.relative_humidity_2m }}%</div>
+    </div>
+    <div style="flex:1;border-left:1px solid #000;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1px;">WIND</div>
+      <div style="font-family:Menlo,'Courier New',monospace;font-size:18px;font-weight:900;">{{ cur.wind_speed_10m | round }}km/h</div>
+    </div>
+    <div style="flex:1;border-left:1px solid #000;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1px;">RISE</div>
+      <div style="font-family:Menlo,'Courier New',monospace;font-size:18px;font-weight:900;">{{ daily.sunrise[0] | date: "%H:%M" }}</div>
+    </div>
+    <div style="flex:1;border-left:1px solid #000;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1px;">SET</div>
+      <div style="font-family:Menlo,'Courier New',monospace;font-size:18px;font-weight:900;">{{ daily.sunset[0] | date: "%H:%M" }}</div>
+    </div>
+  </div>
+
+  <!-- 5-DAY FORECAST (day/max/min/code) -->
+  <div style="flex:1;display:flex;justify-content:space-between;padding-top:3px;">
+    {%- for i in (1..5) -%}
+    <div style="flex:1;text-align:center;{% unless forloop.last %}border-right:1px solid #000;{% endunless %}display:flex;flex-direction:column;justify-content:space-between;padding:2px 0;">
+      <div style="font-size:14px;font-weight:900;letter-spacing:0.5px;">{{ daily.time[i] | date: "%a" | upcase }}</div>
+      <div style="font-family:Menlo,'Courier New',monospace;font-size:17px;font-weight:900;line-height:1.1;">
+        {{ daily.temperature_2m_max[i] | round }}&deg;<br>{{ daily.temperature_2m_min[i] | round }}&deg;
+      </div>
+      <div style="font-size:11px;font-weight:900;">{{ code_arr[i] }}</div>
+    </div>
+    {%- endfor -%}
+  </div>
+
+  <!-- FOOTER -->
+  <div style="font-size:10px;font-weight:700;text-align:right;padding-top:2px;border-top:1px solid #000;">OPEN-METEO &middot; {{ cur.time | date: "%H:%M" }}</div>
+
+</div>
