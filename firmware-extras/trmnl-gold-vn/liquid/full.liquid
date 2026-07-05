@@ -1,13 +1,40 @@
 <!--
-  TRMNL — Vàng SJC Việt Nam (RLCD 1-bit)
-  Source: https://sjc.com.vn/GoldPrice/Services/PriceService.ashx
-  Poll every 30 min. Response: { success, latestDate, data: [ {Id, TypeName, BranchName, Buy, Sell, BuyDiffer, SellDiffer, ...} ] }
+  TRMNL — Vàng DOJI Việt Nam (RLCD 1-bit)
+
+  Source: https://giavang.doji.vn/api/prices  (XML, no Cloudflare)
+  Poll every 30 min. Response is text/xml; Terminus stores it raw in
+  `source_1.body`. We string-parse XML via Liquid `split` filter since
+  stock Liquid has no XML parser.
+
+  DOJI XML layout (excerpt):
+    <GoldList>
+      <DGPlist>
+        <DateTime>...</DateTime>
+        <Row Name='DOJI HN lẻ' Sell='151,400' Buy='148,400' />   (nghìn₫/lượng)
+        <Row Name='DOJI HCM lẻ' Sell='15,140'  Buy='14,840' />   (nghìn₫/chỉ)
+        ...
+      </DGPlist>
+      <IGPList><DateTime>...</DateTime> <Row Name='USD/VND' .../></IGPList>
+      <JewelryList>
+        <Row Name='Vàng 24k (nghìn/chỉ)' Sell='14,600' Buy='14,100' />
+        <Row Name='Giá Nguyên Liệu 18K'  Sell='-'      Buy='10,095' />
+        <Row Name='Giá Nguyên Liệu 14K'  Sell='-'      Buy='7,656'  />
+        <Row Name='Nhẫn Tròn 9999 Hưng Thịnh Vượng' Sell='15,140' Buy='14,840' />
+        ...
+      </JewelryList>
+    </GoldList>
 
   Layout (400x300):
-    Header:   GIÁ VÀNG SJC · <latestDate>
-    Column:   LOẠI · MUA · BÁN · Δ
-    6 rows (SJC 1L HCM, SJC 1L MB, Nhẫn 99.99 1chỉ, Nhẫn 99.99 0.5chỉ, Nữ trang 99.99, Nữ trang 75%)
-    Footer:   Đơn vị 1000₫/chỉ · sjc.com.vn
+    Header:   GIÁ VÀNG DOJI · <IGPList DateTime>
+    Column:   LOẠI · MUA · BÁN
+    6 rows (all nghìn₫/chỉ):
+      1. Vàng miếng SJC · HCM lẻ
+      2. Vàng miếng SJC · HCM buôn
+      3. Nhẫn 9999 Hưng Thịnh Vượng
+      4. Vàng 24K nữ trang
+      5. Nguyên liệu 18K
+      6. Nguyên liệu 14K
+    Footer:   Đơn vị 1000₫/chỉ · giavang.doji.vn
 -->
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -52,9 +79,6 @@
     font-size: 16px;
   }
   tbody tr:last-child td { border-bottom: none; }
-  .delta { font-size: 14px; }
-  .pos::before { content: "+"; }
-  .neg { }
 
   .foot {
     display: flex; align-items: center; justify-content: space-between;
@@ -66,39 +90,65 @@
   .foot .r { font-family: Menlo, "Courier New", monospace; }
 </style>
 
+{%- comment -%}
+  Grab raw XML body. Terminus stores response text at source_1.body when
+  content-type is not JSON.
+{%- endcomment -%}
+{% assign body = source_1.body %}
+
+{%- comment -%}
+  Isolate the two XML blocks. This is important because DOJI reuses the
+  same Name (e.g. "DOJI HCM lẻ") in BOTH DGPlist (unit: nghìn₫/chỉ)
+  and JewelryList (unit: nghìn₫/lượng). We want everything in nghìn₫/chỉ,
+  so we always pull miếng rows from DGPlist and nhẫn/24K/18K/14K from
+  JewelryList.
+{%- endcomment -%}
+{% assign dgp = body | split: "<DGPlist>" | last | split: "</DGPlist>" | first %}
+{% assign jl  = body | split: "<JewelryList>" | last | split: "</JewelryList>" | first %}
+
+{%- comment -%}
+  Extract IGPList DateTime (the freshest timestamp DOJI publishes).
+  Structure: <IGPList><DateTime>17:16 05/07/2026</DateTime>...
+{%- endcomment -%}
+{% assign igp = body | split: "<IGPList>" | last | split: "</DateTime>" | first %}
+{% assign ts = igp | split: "<DateTime>" | last | strip %}
+
+{%- comment -%}
+  Row extractor pattern (all rows below are nghìn₫/chỉ):
+    * DGPlist:      DOJI HCM lẻ / DOJI HCM buôn
+    * JewelryList:  Nhẫn Tròn 9999 Hưng Thịnh Vượng /
+                    Vàng 24k (nghìn/chỉ) / Nguyên liệu 18K / Nguyên liệu 14K
+{%- endcomment -%}
+
+{% assign _r1 = dgp | split: "Name='DOJI HCM lẻ'" | last | split: "/>" | first %}
+{% assign r1_sell = _r1 | split: "Sell='" | last | split: "'" | first %}
+{% assign r1_buy  = _r1 | split: "Buy='"  | last | split: "'" | first %}
+
+{% assign _r2 = dgp | split: "Name='DOJI HCM buôn'" | last | split: "/>" | first %}
+{% assign r2_sell = _r2 | split: "Sell='" | last | split: "'" | first %}
+{% assign r2_buy  = _r2 | split: "Buy='"  | last | split: "'" | first %}
+
+{% assign _r3 = jl | split: "Name='Nhẫn Tròn 9999 Hưng Thịnh Vượng'" | last | split: "/>" | first %}
+{% assign r3_sell = _r3 | split: "Sell='" | last | split: "'" | first %}
+{% assign r3_buy  = _r3 | split: "Buy='"  | last | split: "'" | first %}
+
+{% assign _r4 = jl | split: "Name='Vàng 24k (nghìn/chỉ)'" | last | split: "/>" | first %}
+{% assign r4_sell = _r4 | split: "Sell='" | last | split: "'" | first %}
+{% assign r4_buy  = _r4 | split: "Buy='"  | last | split: "'" | first %}
+
+{% assign _r5 = jl | split: "Name='Giá Nguyên Liệu 18K'" | last | split: "/>" | first %}
+{% assign r5_sell = _r5 | split: "Sell='" | last | split: "'" | first %}
+{% assign r5_buy  = _r5 | split: "Buy='"  | last | split: "'" | first %}
+
+{% assign _r6 = jl | split: "Name='Giá Nguyên Liệu 14K'" | last | split: "/>" | first %}
+{% assign r6_sell = _r6 | split: "Sell='" | last | split: "'" | first %}
+{% assign r6_buy  = _r6 | split: "Buy='"  | last | split: "'" | first %}
+
 <div class="card">
   <div class="hdr">
-    <div class="t">GIÁ VÀNG SJC</div>
-    <div class="d">{{ source_1.latestDate }}</div>
+    <div class="t">GIÁ VÀNG DOJI</div>
+    <div class="d">{{ ts }}</div>
   </div>
-
-  {%- comment -%}
-    Pull 6 canonical rows. Iterate once and stash into named vars via
-    Liquid `assign` — no `where` filter available in stock Liquid without
-    ActionView, so we compare fields inline.
-  {%- endcomment -%}
-  {% assign sjc_1l_hcm = "" %}
-  {% assign sjc_1l_mb  = "" %}
-  {% assign nhan_1c    = "" %}
-  {% assign nhan_05c   = "" %}
-  {% assign nt_9999    = "" %}
-  {% assign nt_75      = "" %}
-
-  {% for r in source_1.data %}
-    {% if r.TypeName == "Vàng SJC 1L, 10L, 1KG" and r.BranchName == "Hồ Chí Minh" %}
-      {% assign sjc_1l_hcm = r %}
-    {% elsif r.TypeName == "Vàng SJC 1L, 10L, 1KG" and r.BranchName == "Miền Bắc" %}
-      {% assign sjc_1l_mb = r %}
-    {% elsif r.TypeName == "Vàng nhẫn SJC 99,99% 1 chỉ, 2 chỉ, 5 chỉ" and r.BranchName == "Hồ Chí Minh" %}
-      {% assign nhan_1c = r %}
-    {% elsif r.TypeName == "Vàng nhẫn SJC 99,99% 0.5 chỉ, 0.3 chỉ" and r.BranchName == "Hồ Chí Minh" %}
-      {% assign nhan_05c = r %}
-    {% elsif r.TypeName == "Nữ trang 99,99%" and r.BranchName == "Hồ Chí Minh" %}
-      {% assign nt_9999 = r %}
-    {% elsif r.TypeName == "Nữ trang 75%" and r.BranchName == "Hồ Chí Minh" %}
-      {% assign nt_75 = r %}
-    {% endif %}
-  {% endfor %}
 
   <table>
     <thead>
@@ -109,53 +159,41 @@
       </tr>
     </thead>
     <tbody>
-      {%- if sjc_1l_hcm != "" -%}
       <tr>
-        <td class="l">SJC 1L · HCM</td>
-        <td>{{ sjc_1l_hcm.Buy }}</td>
-        <td>{{ sjc_1l_hcm.Sell }}</td>
+        <td class="l">SJC 1L · HCM LẺ</td>
+        <td>{{ r1_buy }}</td>
+        <td>{{ r1_sell }}</td>
       </tr>
-      {%- endif -%}
-      {%- if sjc_1l_mb != "" -%}
       <tr>
-        <td class="l">SJC 1L · MB</td>
-        <td>{{ sjc_1l_mb.Buy }}</td>
-        <td>{{ sjc_1l_mb.Sell }}</td>
+        <td class="l">SJC 1L · HCM BUÔN</td>
+        <td>{{ r2_buy }}</td>
+        <td>{{ r2_sell }}</td>
       </tr>
-      {%- endif -%}
-      {%- if nhan_1c != "" -%}
       <tr>
-        <td class="l">NHẪN 99.99 · 1C</td>
-        <td>{{ nhan_1c.Buy }}</td>
-        <td>{{ nhan_1c.Sell }}</td>
+        <td class="l">NHẪN 9999 · HTV</td>
+        <td>{{ r3_buy }}</td>
+        <td>{{ r3_sell }}</td>
       </tr>
-      {%- endif -%}
-      {%- if nhan_05c != "" -%}
       <tr>
-        <td class="l">NHẪN 99.99 · 0.5C</td>
-        <td>{{ nhan_05c.Buy }}</td>
-        <td>{{ nhan_05c.Sell }}</td>
+        <td class="l">VÀNG 24K</td>
+        <td>{{ r4_buy }}</td>
+        <td>{{ r4_sell }}</td>
       </tr>
-      {%- endif -%}
-      {%- if nt_9999 != "" -%}
       <tr>
-        <td class="l">NỮ TRANG 99.99</td>
-        <td>{{ nt_9999.Buy }}</td>
-        <td>{{ nt_9999.Sell }}</td>
+        <td class="l">NGUYÊN LIỆU 18K</td>
+        <td>{{ r5_buy }}</td>
+        <td>{{ r5_sell }}</td>
       </tr>
-      {%- endif -%}
-      {%- if nt_75 != "" -%}
       <tr>
-        <td class="l">NỮ TRANG 75%</td>
-        <td>{{ nt_75.Buy }}</td>
-        <td>{{ nt_75.Sell }}</td>
+        <td class="l">NGUYÊN LIỆU 14K</td>
+        <td>{{ r6_buy }}</td>
+        <td>{{ r6_sell }}</td>
       </tr>
-      {%- endif -%}
     </tbody>
   </table>
 
   <div class="foot">
     <div class="l">Đơn vị: 1000₫/chỉ</div>
-    <div class="r">SJC.COM.VN</div>
+    <div class="r">GIAVANG.DOJI.VN</div>
   </div>
 </div>
