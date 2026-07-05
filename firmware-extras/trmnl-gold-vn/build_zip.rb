@@ -38,7 +38,7 @@ config = {
   "start_at"          => Time.now.utc.iso8601,
   "exchanges"         => [
     {
-      "headers"  => {},
+      "headers"  => Hash(trmnl["polling_headers"]),
       "verb"     => "GET",
       "template" => trmnl["polling_url"].to_s,
       "body"     => {}

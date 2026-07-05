@@ -2,6 +2,9 @@ name: gold_vn
 label: "Vàng SJC Việt Nam"
 description: "Giá vàng SJC / nhẫn / nữ trang từ sjc.com.vn (không cần API key)"
 polling_url: "https://sjc.com.vn/GoldPrice/Services/PriceService.ashx"
+polling_headers:
+  User-Agent: "Mozilla/5.0"
+  Accept: "application/json"
 interval: 30
 unit: minute
 custom_fields: []

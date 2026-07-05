@@ -94,3 +94,24 @@ tạo, gán vào Custom Model 47 (Waveshare RLCD) và playlist 2.
 - **#8** Form PUT wipes bindings — luôn resend `model_ids[]=47`.
 - **#9** Xoá exchange record wipe polling — polling URLs sống trong `exchange.template`.
 - **#10** POST `/extensions/N/build` dedupe silently — dùng edit+save hoặc chờ cron.
+
+## ⚠️ Cloudflare bot challenge
+
+`sjc.com.vn` sits behind Cloudflare, which blocks HTTP clients with default
+`curl/*` or missing User-Agent (returns `403 cf-mitigated: challenge` with
+an HTML challenge page). Terminus's Faraday-based poller trips this.
+
+**Fix**: `polling_headers` in `liquid/settings.yml` sets `User-Agent: Mozilla/5.0`
+(11 chars, minimum that passes CF). `build_zip.rb` bakes these headers into
+`exchanges[0].headers` in `configuration.yml`.
+
+Empirically tested UAs that pass:
+| UA (len) | Result |
+| --- | --- |
+| _(default curl/8.x)_ | 403 (blocked) |
+| `Mozilla/5.0` (11) | 200 ✅ |
+| `Mozilla/5.0 (Firefox)` (21) | 200 ✅ |
+| Full Chrome/Firefox UA | 200 ✅ |
+
+Any UA starting with `Mozilla/5.0` is accepted; Cloudflare only rejects
+the raw curl/wget/bot signatures at this tier.
