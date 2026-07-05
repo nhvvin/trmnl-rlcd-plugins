@@ -1,43 +1,46 @@
-{%- assign symbols_str = trmnl.plugin_settings.custom_fields_values.symbols | default: "USD,EUR,GBP,JPY,CNY,KRW,SGD,THB" -%}
+{%- assign symbols_str = trmnl.plugin_settings.custom_fields_values.symbols | default: "USD,EUR,GBP,JPY,CNY,SGD" -%}
 {%- assign symbols = symbols_str | split: "," -%}
-<div class="screen" style="width:400px;height:300px;background:#fff;color:#000;font-family:'Inter','Helvetica',sans-serif;padding:8px;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;">
+<div style="width:400px;height:300px;background:#fff;color:#000;
+            font-family:'Helvetica Neue','Helvetica','Arial',sans-serif;
+            -webkit-font-smoothing:none;text-rendering:geometricPrecision;
+            padding:10px;box-sizing:border-box;
+            display:flex;flex-direction:column;">
 
-  <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:3px;">
-    <div style="font-size:14px;font-weight:800;letter-spacing:1px;">TỶ GIÁ VCB</div>
-    <div style="font-size:10px;">{{ source_1.Date | date: "%d/%m/%Y" }} · 1 → VND</div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline;
+              border-bottom:3px solid #000;padding-bottom:5px;margin-bottom:5px;">
+    <div style="font-size:22px;font-weight:900;letter-spacing:1px;">TỶ GIÁ VCB</div>
+    <div style="font-size:14px;font-weight:700;">{{ source_1.Date | date: "%d/%m/%Y" }}</div>
   </div>
 
-  <table style="width:100%;border-collapse:collapse;font-size:11px;">
+  <table style="width:100%;border-collapse:collapse;font-weight:700;">
     <thead>
-      <tr style="border-bottom:1px solid #000;">
-        <th style="text-align:left;padding:2px 3px;font-weight:700;">CCY</th>
-        <th style="text-align:right;padding:2px 3px;font-weight:700;">MUA TM</th>
-        <th style="text-align:right;padding:2px 3px;font-weight:700;">MUA CK</th>
-        <th style="text-align:right;padding:2px 3px;font-weight:700;">BÁN</th>
+      <tr style="border-bottom:2px solid #000;">
+        <th style="text-align:left;padding:5px 4px;font-size:15px;font-weight:900;letter-spacing:1px;">CCY</th>
+        <th style="text-align:right;padding:5px 4px;font-size:15px;font-weight:900;letter-spacing:1px;">MUA CK</th>
+        <th style="text-align:right;padding:5px 4px;font-size:15px;font-weight:900;letter-spacing:1px;">BÁN</th>
       </tr>
     </thead>
     <tbody>
-      {%- for sym in symbols -%}
+      {%- for sym in symbols limit: 6 -%}
       {%- assign s = sym | strip | upcase -%}
       {%- assign row = source_1.Data | where: "currencyCode", s | first -%}
       {%- if row -%}
-      {%- assign cash_n     = row.cash     | plus: 0.0 -%}
       {%- assign transfer_n = row.transfer | plus: 0.0 -%}
       {%- assign sell_n     = row.sell     | plus: 0.0 -%}
-      <tr style="border-bottom:1px dotted #999;">
-        <td style="padding:2px 3px;font-weight:700;">{{ s }}</td>
-        <td style="text-align:right;padding:2px 3px;">{% if cash_n > 0 %}{{ cash_n | round: 0 }}{% else %}—{% endif %}</td>
-        <td style="text-align:right;padding:2px 3px;">{{ transfer_n | round: 0 }}</td>
-        <td style="text-align:right;padding:2px 3px;font-weight:700;">{{ sell_n | round: 0 }}</td>
+      <tr style="border-bottom:1px solid #000;">
+        <td style="padding:7px 4px;font-size:18px;font-weight:900;letter-spacing:1px;">{{ s }}</td>
+        <td style="padding:7px 4px;font-size:18px;font-weight:700;text-align:right;font-family:'Menlo','Courier New',monospace;">{{ transfer_n | round: 0 }}</td>
+        <td style="padding:7px 4px;font-size:18px;font-weight:900;text-align:right;font-family:'Menlo','Courier New',monospace;">{{ sell_n | round: 0 }}</td>
       </tr>
       {%- endif -%}
       {%- endfor -%}
     </tbody>
   </table>
 
-  <div style="margin-top:auto;border-top:1px solid #000;padding-top:3px;display:flex;justify-content:space-between;font-size:9px;color:#444;">
+  <div style="margin-top:auto;padding-top:6px;border-top:2px solid #000;
+              display:flex;justify-content:space-between;font-size:12px;font-weight:700;">
     <span>NGUỒN: VIETCOMBANK</span>
-    <span>TM=Tiền mặt · CK=Chuyển khoản</span>
+    <span>1 → VND</span>
   </div>
 
 </div>

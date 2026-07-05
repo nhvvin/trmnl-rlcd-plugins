@@ -18,8 +18,8 @@ custom_fields:
   - keyname: symbols
     field_type: string
     name: Symbols (comma separated)
-    description: Currencies to display. Max 8 fit the layout. Default USD,EUR,GBP,JPY,CNY,KRW,SGD,THB.
-    placeholder: USD,EUR,GBP,JPY,CNY,KRW,SGD,THB
+    description: Currencies to display. Max 6 fit the 1-bit-optimised layout. Default USD,EUR,GBP,JPY,CNY,SGD.
+    placeholder: USD,EUR,GBP,JPY,CNY,SGD
   - keyname: about
     name: About This Plugin
     category: finance
