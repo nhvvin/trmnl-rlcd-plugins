@@ -1,0 +1,161 @@
+<!--
+  TRMNL — Vàng SJC Việt Nam (RLCD 1-bit)
+  Source: https://sjc.com.vn/GoldPrice/Services/PriceService.ashx
+  Poll every 30 min. Response: { success, latestDate, data: [ {Id, TypeName, BranchName, Buy, Sell, BuyDiffer, SellDiffer, ...} ] }
+
+  Layout (400x300):
+    Header:   GIÁ VÀNG SJC · <latestDate>
+    Column:   LOẠI · MUA · BÁN · Δ
+    6 rows (SJC 1L HCM, SJC 1L MB, Nhẫn 99.99 1chỉ, Nhẫn 99.99 0.5chỉ, Nữ trang 99.99, Nữ trang 75%)
+    Footer:   Đơn vị 1000₫/chỉ · sjc.com.vn
+-->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 400px; height: 300px; background: #fff; color: #000;
+    font-family: Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: none;
+    text-rendering: geometricPrecision;
+    font-weight: 700;
+  }
+  .card { width: 400px; height: 300px; padding: 0; overflow: hidden; }
+
+  .hdr {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 6px 10px 4px;
+    border-bottom: 2px solid #000;
+  }
+  .hdr .t { font-size: 20px; letter-spacing: 1px; }
+  .hdr .d { font-family: Menlo, "Courier New", monospace; font-size: 15px; }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead th {
+    font-size: 13px; letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 8px 4px;
+    border-bottom: 1px solid #000;
+    text-align: right;
+  }
+  thead th.l { text-align: left; }
+  tbody td {
+    font-size: 17px;
+    padding: 5px 8px;
+    border-bottom: 1px solid #000;
+    text-align: right;
+    font-family: Menlo, "Courier New", monospace;
+    line-height: 1.1;
+  }
+  tbody td.l {
+    text-align: left;
+    font-family: Helvetica, Arial, sans-serif;
+    letter-spacing: 0.4px;
+    font-size: 16px;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .delta { font-size: 14px; }
+  .pos::before { content: "+"; }
+  .neg { }
+
+  .foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 10px 5px;
+    border-top: 2px solid #000;
+    font-size: 12px; letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .foot .r { font-family: Menlo, "Courier New", monospace; }
+</style>
+
+<div class="card">
+  <div class="hdr">
+    <div class="t">GIÁ VÀNG SJC</div>
+    <div class="d">{{ source_1.latestDate }}</div>
+  </div>
+
+  {%- comment -%}
+    Pull 6 canonical rows. Iterate once and stash into named vars via
+    Liquid `assign` — no `where` filter available in stock Liquid without
+    ActionView, so we compare fields inline.
+  {%- endcomment -%}
+  {% assign sjc_1l_hcm = "" %}
+  {% assign sjc_1l_mb  = "" %}
+  {% assign nhan_1c    = "" %}
+  {% assign nhan_05c   = "" %}
+  {% assign nt_9999    = "" %}
+  {% assign nt_75      = "" %}
+
+  {% for r in source_1.data %}
+    {% if r.TypeName == "Vàng SJC 1L, 10L, 1KG" and r.BranchName == "Hồ Chí Minh" %}
+      {% assign sjc_1l_hcm = r %}
+    {% elsif r.TypeName == "Vàng SJC 1L, 10L, 1KG" and r.BranchName == "Miền Bắc" %}
+      {% assign sjc_1l_mb = r %}
+    {% elsif r.TypeName == "Vàng nhẫn SJC 99,99% 1 chỉ, 2 chỉ, 5 chỉ" and r.BranchName == "Hồ Chí Minh" %}
+      {% assign nhan_1c = r %}
+    {% elsif r.TypeName == "Vàng nhẫn SJC 99,99% 0.5 chỉ, 0.3 chỉ" and r.BranchName == "Hồ Chí Minh" %}
+      {% assign nhan_05c = r %}
+    {% elsif r.TypeName == "Nữ trang 99,99%" and r.BranchName == "Hồ Chí Minh" %}
+      {% assign nt_9999 = r %}
+    {% elsif r.TypeName == "Nữ trang 75%" and r.BranchName == "Hồ Chí Minh" %}
+      {% assign nt_75 = r %}
+    {% endif %}
+  {% endfor %}
+
+  <table>
+    <thead>
+      <tr>
+        <th class="l" style="width: 44%;">LOẠI</th>
+        <th style="width: 26%;">MUA</th>
+        <th style="width: 26%;">BÁN</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- if sjc_1l_hcm != "" -%}
+      <tr>
+        <td class="l">SJC 1L · HCM</td>
+        <td>{{ sjc_1l_hcm.Buy }}</td>
+        <td>{{ sjc_1l_hcm.Sell }}</td>
+      </tr>
+      {%- endif -%}
+      {%- if sjc_1l_mb != "" -%}
+      <tr>
+        <td class="l">SJC 1L · MB</td>
+        <td>{{ sjc_1l_mb.Buy }}</td>
+        <td>{{ sjc_1l_mb.Sell }}</td>
+      </tr>
+      {%- endif -%}
+      {%- if nhan_1c != "" -%}
+      <tr>
+        <td class="l">NHẪN 99.99 · 1C</td>
+        <td>{{ nhan_1c.Buy }}</td>
+        <td>{{ nhan_1c.Sell }}</td>
+      </tr>
+      {%- endif -%}
+      {%- if nhan_05c != "" -%}
+      <tr>
+        <td class="l">NHẪN 99.99 · 0.5C</td>
+        <td>{{ nhan_05c.Buy }}</td>
+        <td>{{ nhan_05c.Sell }}</td>
+      </tr>
+      {%- endif -%}
+      {%- if nt_9999 != "" -%}
+      <tr>
+        <td class="l">NỮ TRANG 99.99</td>
+        <td>{{ nt_9999.Buy }}</td>
+        <td>{{ nt_9999.Sell }}</td>
+      </tr>
+      {%- endif -%}
+      {%- if nt_75 != "" -%}
+      <tr>
+        <td class="l">NỮ TRANG 75%</td>
+        <td>{{ nt_75.Buy }}</td>
+        <td>{{ nt_75.Sell }}</td>
+      </tr>
+      {%- endif -%}
+    </tbody>
+  </table>
+
+  <div class="foot">
+    <div class="l">Đơn vị: 1000₫/chỉ</div>
+    <div class="r">SJC.COM.VN</div>
+  </div>
+</div>
