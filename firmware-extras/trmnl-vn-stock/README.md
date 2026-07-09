@@ -162,6 +162,7 @@ Lý do: VN market giao dịch 9:00–11:30 + 13:00–15:00 ICT (Mon–Fri). Refr
 | Time hiện sai timezone | Template hardcode UTC+7 (`plus: 25200`). Đổi số này nếu múi giờ khác. |
 | Image cũ không refresh | Sidekiq worker chưa chạy. `docker compose up -d worker`. |
 | Cropped trên board | Browser của Terminus có thể render với default font khác. Verify `<style>` block đã apply. |
+| **Dòng cuối (MWG) bị miết hoặc biến mất trên device** | Height budget quá sát 300px. Đã sửa: row height 24→22px, `no_screen_padding: yes` để claim full canvas, padding đầu trang 8→4px. Slack từ 8px → 45px, an toàn cho mọi firmware/framebuffer clip nhẹ. |
 | 503/504 từ SSI | SSI server overload (hiếm). Plugin sẽ retry ở refresh tiếp theo. |
 
 ---

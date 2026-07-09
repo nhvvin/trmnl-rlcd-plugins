@@ -198,7 +198,8 @@
 		// "CHI NHÁNH HỒ CHÍ MINH") over the coarser region label; keep the region
 		// in parentheses so both are visible when we have them.
 		var tail = "";
-		if (src.branch && src.area) tail = " · " + src.branch + " (" + src.area + ")";
+		if (src.branch && src.area)
+			tail = " · " + src.branch + " (" + src.area + ")";
 		else if (src.branch) tail = " · " + src.branch;
 		else if (src.area) tail = " · " + src.area;
 		if (tail) source.appendChild(document.createTextNode(tail));
