@@ -6,8 +6,12 @@
     source_10 = VN30
 {%- endcomment -%}
 
-{%- comment -%} ---- helper: extract latest close + previous close from SSI bars ---- {%- endcomment -%}
-{%- assign idx_bars   = source_1.data  -%}
+{%- comment -%} ---- helper: extract latest close + previous close from SSI bars ----
+  SSI iBoard trả về EITHER shape phẳng {t,c,o,h,l,v} HOẶC shape bọc
+  {code, message, data:{t,c,o,h,l,v}}. Terminus lưu raw response body vào
+  source_N.data, nên ta thử wrapped path trước rồi fallback về flat.
+{%- endcomment -%}
+{%- assign idx_bars   = source_1.data.data | default: source_1.data -%}
 {%- assign idx_n      = idx_bars.c | size -%}
 {%- assign idx_last   = idx_bars.c | last -%}
 {%- assign idx_prev_i = idx_n | minus: 2 -%}
@@ -18,7 +22,7 @@
 {%- elsif idx_chg < 0 -%}{% assign idx_arrow = "▼" %}{% assign idx_sign = "" %}
 {%- else -%}{% assign idx_arrow = "=" %}{% assign idx_sign = "" %}{%- endif -%}
 
-{%- assign vn30_bars = source_10.data -%}
+{%- assign vn30_bars = source_10.data.data | default: source_10.data -%}
 {%- assign vn30_n    = vn30_bars.c | size -%}
 {%- assign vn30_last = vn30_bars.c | last -%}
 {%- assign vn30_prev_i = vn30_n | minus: 2 -%}
@@ -92,7 +96,7 @@
         {%- when 9 -%}{%- assign s = source_9 -%}{%- assign label = trmnl.plugin_settings.custom_fields_values.t8 | default: "MWG" -%}
       {%- endcase -%}
 
-      {%- assign bars = s.data -%}
+      {%- assign bars = s.data.data | default: s.data -%}
       {%- assign n    = bars.c | size -%}
       {%- if n > 1 -%}
         {%- assign last = bars.c | last -%}

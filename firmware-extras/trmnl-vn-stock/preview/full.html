@@ -6,216 +6,109 @@
 </head>
 <body>
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  html,
-  body {
-    width: 400px;
-    height: 300px;
-    background: #fff;
-    color: #000;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: none;
-  }
-  .frame {
-    width: 400px;
-    height: 300px;
-    padding: 4px 12px;
-    display: flex;
-    flex-direction: column;
-  }
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    height: 20px;
-  }
-  .header .title {
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 1px;
-  }
-  .header .time {
-    font-size: 11px;
-    font-weight: 500;
-  }
-  .rule {
-    height: 2px;
-    background: #000;
-    margin: 1px 0;
-  }
-  .rule-thin {
-    height: 1px;
-    background: #000;
-    margin: 1px 0;
-  }
-  .idx {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    height: 26px;
-    padding: 2px 4px;
-  }
-  .idx .name {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .idx .price {
-    font-size: 18px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-  }
-  .idx .delta {
-    font-size: 12px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-  table.tickers {
-    width: 100%;
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    border-collapse: collapse;
-  }
-  table.tickers td {
-    height: 22px; line-height: 22px;
-    padding: 0;
-    vertical-align: middle;
-  }
-  .t-code {
-    width: 50px;
-    font-weight: 700;
-  }
-  .t-price {
-    width: 90px;
-    text-align: right;
-    padding-right: 4px;
-    font-weight: 600;
-  }
-  .t-arrow {
-    width: 16px;
-    text-align: center;
-    font-weight: 700;
-  }
-  .t-pct {
-    width: 70px;
-    text-align: right;
-    padding-right: 8px;
-    font-weight: 600;
-  }
-  .t-vol {
-    text-align: right;
-    opacity: 0.75;
-  }
-  .footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    height: 16px;
-    font-size: 10px;
-    opacity: 0.75;
-  }
-  .footer .vn30 {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    opacity: 1;
-  }
-  .footer .brand {
-    letter-spacing: 1px;
-  }
-  .neg {
-  }
-  .pos {
-  }
-  .flat {
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 400px; height: 300px; background: #fff; color: #000;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: none; }
+  .frame { width: 400px; height: 300px; padding: 4px 12px; display: flex; flex-direction: column; }
+  .header { display: flex; justify-content: space-between; align-items: baseline; height: 20px; }
+  .header .title { font-size: 14px; font-weight: 800; letter-spacing: 1px; }
+  .header .time  { font-size: 11px; font-weight: 500; }
+  .rule { height: 2px; background: #000; margin: 1px 0; }
+  .rule-thin { height: 1px; background: #000; margin: 1px 0; }
+  .idx { display: flex; justify-content: space-between; align-items: baseline;
+    height: 26px; padding: 2px 4px; }
+  .idx .name  { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+  .idx .price { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .idx .delta { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  table.tickers { width: 100%; font-size: 12px; font-variant-numeric: tabular-nums;
+    border-collapse: collapse; }
+  table.tickers td { height: 22px; line-height: 22px; padding: 0; vertical-align: middle; }
+  .t-code   { width: 50px; font-weight: 700; }
+  .t-price  { width: 90px; text-align: right; padding-right: 4px; font-weight: 600; }
+  .t-arrow  { width: 16px; text-align: center; font-weight: 700; }
+  .t-pct    { width: 70px; text-align: right; padding-right: 8px; font-weight: 600; }
+  .t-vol    { text-align: right; opacity: 0.75; }
+  .footer { display: flex; justify-content: space-between; align-items: baseline;
+    height: 16px; font-size: 10px; opacity: 0.75; }
+  .footer .vn30  { font-weight: 700; font-variant-numeric: tabular-nums; opacity: 1; }
+  .footer .brand { letter-spacing: 1px; }
+  .neg { } .pos { } .flat { }
 </style>
 
 <div class="frame">
+
   <!-- ── Header ─────────────────────────── -->
   <div class="header">
-    <div class="title">VN STOCK</div>
-    <div class="time">28/06 09:24</div>
+    <div class="title">VN STOCK</div><div class="time">11/07  05:08</div>
   </div>
   <div class="rule"></div>
 
   <!-- ── VN-INDEX hero ──────────────────── -->
   <div class="idx">
     <div class="name">VN-INDEX</div>
-    <div class="price">1871.91</div>
-    <div class="delta">▲ +8.84 (+0.47%)</div>
+    <div class="price">1828.34</div>
+    <div class="delta">▼ -12.36 (-0.67%)</div>
   </div>
   <div class="rule-thin"></div>
 
   <!-- ── 8 ticker rows ──────────────────── -->
-  <table class="tickers">
-    <tr>
-      <td class="t-code">VNM</td>
-      <td class="t-price">56.3</td>
-      <td class="t-arrow">▼</td>
-      <td class="t-pct">-0.27%</td>
-      <td class="t-vol">3.2M</td>
-    </tr>
-    <tr>
-      <td class="t-code">FPT</td>
-      <td class="t-price">70.8</td>
-      <td class="t-arrow">▼</td>
-      <td class="t-pct">-0.28%</td>
-      <td class="t-vol">4.3M</td>
-    </tr>
-    <tr>
-      <td class="t-code">MSN</td>
-      <td class="t-price">71.4</td>
-      <td class="t-arrow">▼</td>
-      <td class="t-pct">-0.14%</td>
-      <td class="t-vol">1.9M</td>
-    </tr>
-    <tr>
-      <td class="t-code">VIC</td>
-      <td class="t-price">228</td>
-      <td class="t-arrow">▲</td>
-      <td class="t-pct">+1.33%</td>
-      <td class="t-vol">2.6M</td>
-    </tr>
-    <tr>
-      <td class="t-code">VHM</td>
-      <td class="t-price">156.01</td>
-      <td class="t-arrow">▲</td>
-      <td class="t-pct">+3.52%</td>
-      <td class="t-vol">10.4M</td>
-    </tr>
-    <tr>
-      <td class="t-code">HPG</td>
-      <td class="t-price">23.5</td>
-      <td class="t-arrow">▲</td>
-      <td class="t-pct">+0.43%</td>
-      <td class="t-vol">15.5M</td>
-    </tr>
-    <tr>
-      <td class="t-code">VCB</td>
-      <td class="t-price">61.4</td>
-      <td class="t-arrow">▲</td>
-      <td class="t-pct">+0.99%</td>
-      <td class="t-vol">3.3M</td>
-    </tr>
-    <tr>
-      <td class="t-code">MWG</td>
-      <td class="t-price">78.5</td>
-      <td class="t-arrow">▲</td>
-      <td class="t-pct">+1.68%</td>
-      <td class="t-vol">4.9M</td>
-    </tr>
-  </table>
+  <table class="tickers"><tr>
+          <td class="t-code">VNM</td>
+          <td class="t-price">56.6</td>
+          <td class="t-arrow">▲</td>
+          <td class="t-pct">+1.62%</td>
+          <td class="t-vol">5.6M</td>
+        </tr><tr>
+          <td class="t-code">FPT</td>
+          <td class="t-price">70.6</td>
+          <td class="t-arrow">▼</td>
+          <td class="t-pct">-2.08%</td>
+          <td class="t-vol">7.9M</td>
+        </tr><tr>
+          <td class="t-code">MSN</td>
+          <td class="t-price">68.8</td>
+          <td class="t-arrow">▼</td>
+          <td class="t-pct">-0.15%</td>
+          <td class="t-vol">2.7M</td>
+        </tr><tr>
+          <td class="t-code">VIC</td>
+          <td class="t-price">223</td>
+          <td class="t-arrow">▲</td>
+          <td class="t-pct">+0.9%</td>
+          <td class="t-vol">4.0M</td>
+        </tr><tr>
+          <td class="t-code">VHM</td>
+          <td class="t-price">147</td>
+          <td class="t-arrow">▼</td>
+          <td class="t-pct">-1.14%</td>
+          <td class="t-vol">3.2M</td>
+        </tr><tr>
+          <td class="t-code">HPG</td>
+          <td class="t-price">22.95</td>
+          <td class="t-arrow">▼</td>
+          <td class="t-pct">-1.08%</td>
+          <td class="t-vol">11.9M</td>
+        </tr><tr>
+          <td class="t-code">VCB</td>
+          <td class="t-price">60.5</td>
+          <td class="t-arrow">▼</td>
+          <td class="t-pct">-0.98%</td>
+          <td class="t-vol">3.0M</td>
+        </tr><tr>
+          <td class="t-code">MWG</td>
+          <td class="t-price">76.6</td>
+          <td class="t-arrow">▼</td>
+          <td class="t-pct">-2.42%</td>
+          <td class="t-vol">3.2M</td>
+        </tr></table>
 
   <!-- ── Footer ─────────────────────────── -->
   <div class="rule-thin"></div>
   <div class="footer">
-    <span class="vn30">VN30 2008.57 ▲ +0.2%</span>
+    <span class="vn30">VN30 1970.82 ▼ -0.82%</span>
     <span class="brand">SSI iBoard</span>
   </div>
+
 </div>
 </body>
 </html>

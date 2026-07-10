@@ -163,6 +163,7 @@ Lý do: VN market giao dịch 9:00–11:30 + 13:00–15:00 ICT (Mon–Fri). Refr
 | Image cũ không refresh | Sidekiq worker chưa chạy. `docker compose up -d worker`. |
 | Cropped trên board | Browser của Terminus có thể render với default font khác. Verify `<style>` block đã apply. |
 | **Dòng cuối (MWG) bị miết hoặc biến mất trên device** | Height budget quá sát 300px. Đã sửa: row height 24→22px, `no_screen_padding: yes` để claim full canvas, padding đầu trang 8→4px. Slack từ 8px → 45px, an toàn cho mọi firmware/framebuffer clip nhẹ. |
+| **Screen không xuất hiện / tất cả rồng "no data"** | SSI iBoard đổi schema JSON: cũ `{s,t,c,o,h,l,v}` (UDF phẳng) → mới `{code, message, data:{t,c,o,h,l,v}}` (bọc). Template giờ truy cập `source_N.data.data.c \| default: source_N.data.c` để handle cả 2 shape. Re-upload `dist/vn-stock-dashboard.zip`. |
 | 503/504 từ SSI | SSI server overload (hiếm). Plugin sẽ retry ở refresh tiếp theo. |
 
 ---
